@@ -1,0 +1,53 @@
+.venv/
+__pycache__/
+*.pyc
+.tmp_pip/
+
+# big artifacts
+results/
+data/
+runs/
+
+# logs and models
+*.log
+*.pt
+*.pth
+
+# generated images/csv
+*.csv
+*.png
+
+# release bundles
+results/archive/
+paper/cea_draft/submission_package/*.zip
+paper/cea_draft/submission_package/CEA_EM_flat.zip
+paper/cea_draft/submission_package/source.zip
+
+# local temp/browser state
+.chrome_tmp/
+.chrome_tmp_pdf/
+.edge_tmp/
+
+# local build/output folders
+build/
+logs/
+tmp/
+out_*/
+CEA_submission_ready_package/
+release_bundle_v1/logs/
+release_bundle_v1/out_*/
+
+# generated documents and latex intermediates
+*.aux
+*.bbl
+*.blg
+*.docx
+*.err
+*.html
+*.out
+*.spl
+*.zip
+
+# paper local exports
+paper/cea_draft/build/
+paper/cea_draft/*.pdf

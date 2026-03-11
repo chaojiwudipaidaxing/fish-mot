@@ -1,0 +1,38 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{geometry}[2026/03/10 Minimal local geometry shim for elsarticle]
+
+\RequirePackage{keyval}
+
+\newif\ifGm@center
+\Gm@centerfalse
+
+\define@key{Gm}{paperwidth}{\setlength{\paperwidth}{#1}}
+\define@key{Gm}{paperheight}{\setlength{\paperheight}{#1}}
+\define@key{Gm}{textwidth}{\setlength{\textwidth}{#1}}
+\define@key{Gm}{textheight}{\setlength{\textheight}{#1}}
+\define@key{Gm}{headheight}{\setlength{\headheight}{#1}}
+\define@key{Gm}{headsep}{\setlength{\headsep}{#1}}
+\define@key{Gm}{footskip}{\setlength{\footskip}{#1}}
+\define@key{Gm}{footnotesep}{\skip\footins=#1\relax}
+\define@key{Gm}{columnsep}{\setlength{\columnsep}{#1}}
+\define@key{Gm}{centering}[true]{\Gm@centertrue}
+\define@key{Gm}{twoside}[true]{}
+
+\def\Gm@apply{%
+  \ifGm@center
+    \setlength{\oddsidemargin}{\dimexpr(\paperwidth-\textwidth)/2-1in\relax}%
+    \setlength{\evensidemargin}{\oddsidemargin}%
+    \setlength{\topmargin}{\dimexpr(\paperheight-\textheight-\headheight-\headsep-\footskip)/2-1in\relax}%
+  \fi
+  \ifdefined\pdfpagewidth
+    \pdfpagewidth=\paperwidth
+    \pdfpageheight=\paperheight
+  \fi
+}
+
+\def\geometry#1{%
+  \setkeys{Gm}{#1}%
+  \Gm@apply
+}
+
+\endinput

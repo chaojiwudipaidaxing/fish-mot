@@ -1,0 +1,65 @@
+{
+  "schema_version": 2,
+  "generated_at_utc": "2026-03-10T14:31:00.823466+00:00",
+  "spec_role": "frozen_experiment_spec",
+  "framework_name": "Audit-Ready Evaluation Framework for Fish MOT Reliability",
+  "audit_ready_protocol": true,
+  "exp_id": "main_val",
+  "result_name": "main_val",
+  "release_bundle_id": "release_bundle_v1",
+  "result_root": "results/main_val",
+  "mot_root": "data/mft25_mot_full",
+  "seed_root": "results/main_val/seed_runs",
+  "tables_dir": "results/main_val/tables",
+  "paper_assets_dir": "results/main_val/paper_assets",
+  "release_dir": "results/main_val/release",
+  "runtime_dir": "results/main_val/runtime",
+  "stratified_dir": "results/main_val/stratified",
+  "run_config_path": "results/main_val/run_config.json",
+  "split": "val_half",
+  "max_frames": 1000,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "drop_rate": 0.2,
+  "jitter": 0.02,
+  "gating_thresh": 2000.0,
+  "bucket_mode": "quantile",
+  "q1": 0.33,
+  "q2": 0.66,
+  "bucket_min_samples": 200,
+  "pred_root": "results/main_val/seed_runs/seed_0",
+  "methods": [
+    "base",
+    "gating",
+    "traj",
+    "adaptive",
+    "bytetrack",
+    "ocsort",
+    "botsort"
+  ],
+  "manifest_hash": {
+    "path": "results/main_val/release/manifest.json",
+    "algorithm": "sha256",
+    "value": "53DD4B50610172F736BD52B0A6EBAB7CEB0CB61F4BE25DCE25851E5DF44FCB1C"
+  },
+  "seed_locking": {
+    "enabled": true,
+    "mode": "fixed_list",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "policy": "audit_ready_protocol"
+  },
+  "git_commit": "TESTCOMMIT1234567",
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "python": "3.14.0"
+  },
+  "cwd": "C:/Users/占子豪/Desktop/fish-mot"
+}

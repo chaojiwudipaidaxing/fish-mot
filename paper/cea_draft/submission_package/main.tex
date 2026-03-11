@@ -1,0 +1,271 @@
+\documentclass[preprint,12pt]{elsarticle}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{siunitx}
+\usepackage{longtable}
+\sisetup{
+  separate-uncertainty=true,
+  table-number-alignment=center,
+  table-align-text-post=false,
+  detect-weight=true,
+  detect-inline-weight=math
+}
+
+\journal{Computers and Electronics in Agriculture}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{A drift-proof and deployment-oriented evaluation framework for fish multi-object tracking in digital aquaculture}
+
+\author{Anonymous Author(s)}
+
+\begin{abstract}
+This study presents an investigator-developed evaluation framework for fish multi-object tracking and counting in digital aquaculture, centered on auditable protocol design and deployment decision rules. Rather than claiming across-the-board gains, we integrate run-configuration locking, data-drift gates, manifest hash tracing, controlled detector degradation (drop/jitter), quantile stratified difficulty analysis, count stability metrics, and runtime profiling in one reproducible pipeline. On a frozen val-half snapshot (8 sequences, 1000 frames each, seeds 0/1/2), Base reports HOTA 58.232\,$\pm$\,0.304 and IDF1 64.042\,$\pm$\,0.550, while ByteTrack reports HOTA 58.431\,$\pm$\,0.291 and IDF1 64.011\,$\pm$\,0.545. The +gating/+traj/+adaptive variants expose explicit trade-offs rather than monotonic gains. Controlled degradation and bucketed diagnostics show where failures accumulate (especially low-confidence and turning regimes), while runtime profiling separates lightweight options (Base, +gating) from high-cost options (+traj, +adaptive). We translate these observations into threshold-based guidance for CPU/edge deployment under frame-rate and memory constraints. The resulting contribution is an engineering evidence framework that links fairness, stress testing, failure interpretation, and reproducible release artifacts for smart aquaculture.
+\end{abstract}
+
+\begin{keyword}
+digital aquaculture \sep fish multi-object tracking \sep counting stability \sep reproducibility \sep robustness-cost trade-off \sep edge deployment
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+Digital aquaculture relies on reliable fish trajectories and counts for biomass estimation, feeding control, and welfare monitoring. In this context, a model that is slightly better on a single benchmark but hard to reproduce or deploy can be less useful than a model with transparent limits and stable behavior. Therefore, this paper follows a route-B positioning: we do not claim universal dominance. We instead present a complete evaluation framework that links fairness, robustness diagnostics, and deployment decisions under compute constraints.
+
+To make the claims directly testable, this work contributes:
+\begin{enumerate}
+  \item an auditable evaluation protocol that locks run configuration, data gates, and manifest hashes;
+  \item a controlled degradation matrix (drop/jitter) plus a gating-threshold sensitivity check for robustness auditing;
+  \item stratified difficulty diagnostics (occlusion/density/turn/low-confidence) to localize failure modes in ID consistency and counting;
+  \item deployment decision rules derived from joint accuracy--cost evidence (FPS, memory, CPU, and count stability);
+  \item a reproducibility package design for double-blind review and post-acceptance release.
+\end{enumerate}
+
+\section{Related work}
+\subsection{Tracking baselines and association design}
+Modern online MOT systems differ mainly in association design and handling of low-confidence detections. ByteTrack associates almost every detection and is a strong and efficient baseline~\cite{bytetrack2022}. OC-SORT emphasizes observation-centric updates under motion uncertainty~\cite{ocsort2022}. BoT-SORT integrates stronger association cues and camera-motion-aware design for improved robustness~\cite{botsort2022}. These methods form the strong-baseline set in our experiments.
+
+Beyond these recent trackers, the broader MOT lineage (e.g., SORT/DeepSORT style association pipelines~\cite{sort2016,deepsort2017}) motivates two engineering concerns in practice: metric sensitivity to detection quality and speed-memory trade-offs under deployment constraints. Our framework addresses these concerns at protocol level rather than by proposing a new universal tracker.
+
+\subsection{Evaluation metrics and reproducible benchmarking}
+HOTA explicitly balances detection and association quality and is now a standard MOT metric~\cite{hota2020}. TrackEval provides a unified implementation for metric computation and cross-method comparability~\cite{trackeval2020}. We adopt this metric/evaluator stack and extend it with multi-seed aggregation, per-sequence reporting, stratified bucket analysis, and explicit reproducibility metadata.
+
+\subsection{Aquaculture vision, fish tracking, and counting}
+Aquaculture vision has evolved from foundational computer-vision task reviews toward full digital-aquaculture stacks that integrate monitoring, management, and decision support~\cite{zion2012,fore2018,zhou2018feeding,li2020biomass,barbedo2022review,cui2025survey}. Along this trajectory, counting-oriented works have emphasized practical instrumentation and affordability, from embedded counters to vision-based hatchery/fingerling workflows and modern deep counting models~\cite{hernandez2018counter,albuquerque2019fingerlings,zhang2020fishcount}. In parallel, tracking and behavior studies have shifted toward deep models for abnormal-event detection and monitoring robustness in dense farming scenes~\cite{mei2022trackingreview,wang2022abnormal,zhao2024stereo}. 
+
+However, most studies still report isolated task metrics (only counting, only tracking, or only behavior) and rarely connect these outcomes to reproducibility controls, stress-test protocols, and deployment constraints in one auditable pipeline. In line with CEA expectations, our novelty is an investigator-developed evaluation system (drift-proof + stress-tested + deployment-aware), not a first-use re-packaging of off-the-shelf methods.
+
+\section{Methods: investigator-developed evaluation framework}
+\subsection{Drift-proof reproducibility core}
+The framework starts from a single run configuration (\texttt{run\_config.json}) that locks split, frame budget, seeds, degradation parameters, gating threshold, and data root. Data drift is prevented by an explicit MOT-root policy and a data gate. Outputs are routed into fixed subdirectories (tables, runtime, stratified, paper assets, release), while manifest hashing records provenance of both inputs and outputs.
+
+\subsection{Controlled degradation protocol}
+We evaluate robustness under controlled detection degradation using drop rate and bounding-box jitter. This protocol quantifies how rapidly tracking identity and matching quality degrade as sensor/detector quality worsens, which is central for aquaculture edge deployments where lighting/turbidity conditions vary.
+
+\subsection{Stratified difficulty diagnostics}
+To expose failure mechanisms beyond global means, we run quantile-based stratified evaluation over occlusion, density, turning, and low-confidence scores. Each bucket reports F1, IDSW, and counting errors, enabling direct identification of difficulty regimes that trigger association instability.
+
+\subsection{Count stability and runtime profiling}
+We augment MOT metrics with count stability indicators (CountMAE/CountRMSE/CountVar/CountDrift) and runtime profiles (FPS, memory peak, normalized CPU). This makes it possible to build threshold-based deployment rules rather than relying on one-score ranking.
+
+\section{Experimental setup}
+\subsection{Frozen configuration and data}
+Configuration is locked in the frozen release package: split=val-half, MOT root=\texttt{data/mft25\_mot\_full}, max frames=1000, seeds=[0, 1, 2], drop rate=0.2, jitter=0.02, and gating threshold=2000.0. The evaluated val-half bundle contains eight sequences and 8000 evaluated frames in total.
+
+\subsection{Methods and fairness protocol}
+We evaluate Base, +gating, +traj, +adaptive, and strong baselines ByteTrack/OC-SORT/BoT-SORT. Fairness rule: all trackers consume the same detection source and are evaluated with the same split/frame budget and TrackEval pipeline. Reporting uses multi-seed mean$\pm$std when available.
+
+\subsection{Research questions}
+RQ1: How do core variants and strong baselines compare on global metrics?\\
+RQ2: What robustness trend appears under controlled degradation?\\
+RQ3: Which difficulty buckets dominate ID switches and counting errors?\\
+RQ4: Which methods satisfy deployment budgets on FPS/memory/CPU?
+
+\section{Results}
+\subsection{Core method family (Base to +adaptive)}
+Table~\ref{tab:core_main} and Fig.~\ref{fig:core_main_png} answer RQ1 for the internal method family. Base achieves HOTA 58.232$\pm$0.304 and IDF1 64.042$\pm$0.550. In this frozen run, +gating/+traj/+adaptive are below Base on HOTA/IDF1 and above Base on IDSW, so we treat them as controllable trade-off variants rather than monotonic improvements.
+
+\begin{table}[t]
+\centering
+\caption{Core methods on val-half (mean$\pm$std).}
+\label{tab:core_main}
+\input{tables/paper_main_table.tex}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/main_table_val_seedmean_std_paper.png}
+\caption{Core method family comparison (mean$\pm$std).}
+\label{fig:core_main_png}
+\end{figure}
+
+\subsection{Strong baselines and combined comparison}
+Table~\ref{tab:strong_only} and Fig.~\ref{fig:strong_png} answer RQ1 for strong baselines only. ByteTrack is the strongest among the three baselines on HOTA (58.431$\pm$0.291) and IDF1 (64.011$\pm$0.545) in this run.
+
+To show fair side-by-side context, Table~\ref{tab:all_methods} and Fig.~\ref{fig:all_methods_png} combine all methods under one evaluation pipeline. ByteTrack exceeds Base by +0.199 HOTA, while Base has lower IDSW by 9.000 compared with ByteTrack. This supports a trade-off interpretation instead of a single-winner claim.
+
+\begin{table}[t]
+\centering
+\caption{Strong baseline methods (mean$\pm$std).}
+\label{tab:strong_only}
+\input{tables/strong_baselines_seedmean_std.tex}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/strong_baselines_seedmean_std.png}
+\caption{Strong baseline comparison (ByteTrack/OC-SORT/BoT-SORT).}
+\label{fig:strong_png}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{All methods under one fairness setting.}
+\label{tab:all_methods}
+\input{tables/main_table_with_baselines.tex}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.96\linewidth]{figs/main_table_with_baselines.png}
+\caption{Combined comparison of proposed variants and strong baselines.}
+\label{fig:all_methods_png}
+\end{figure}
+
+\subsection{Robustness under controlled degradation}
+Using the frozen degradation table, we compute drop-induced degradation from drop rate 0.0 to 0.4 at jitter=0.00 and 0.02 (Table~\ref{tab:degradation_delta}). For jitter=0.00, $\Delta$HOTA/$\Delta$IDF1 are: Base (35.707/27.959), +gating (28.299/19.257), ByteTrack (35.557/27.857). For jitter=0.02: Base (33.474/25.141), +gating (24.139/14.888), ByteTrack (33.382/25.082).
+
+At the worst point (drop=0.4, jitter=0.02), HOTA ranking is ByteTrack 41.435 > Base 41.182 > +gating 38.727; the top-vs-second gap is 0.253. IDF1 ties between ByteTrack and Base at 49.770, both above +gating (45.989). For IDSW (lower is better), Base (99.625) < ByteTrack (112.750) < +gating (127.875).
+
+\begin{table}[t]
+\centering
+\caption{Degradation deltas from drop 0.0 to 0.4 (seed=0).}
+\label{tab:degradation_delta}
+\begin{tabular}{l S S S S S S}
+\toprule
+Jitter & {Base $\Delta$HOTA} & {Base $\Delta$IDF1} & {+gating $\Delta$HOTA} & {+gating $\Delta$IDF1} & {ByteTrack $\Delta$HOTA} & {ByteTrack $\Delta$IDF1} \\
+\midrule
+0.00 & 35.707 & 27.959 & 28.299 & 19.257 & 35.557 & 27.857 \\
+0.02 & 33.474 & 25.141 & 24.139 & 14.888 & 33.382 & 25.082 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/degradation_grid.png}
+\caption{Controlled degradation curves (Base, +gating, ByteTrack).}
+\label{fig:degradation}
+\end{figure}
+
+\subsection{Gating threshold sensitivity (deployment robustness check)}
+Using the frozen sensitivity table (seed=0), Base reports HOTA/IDF1/IDSW = 57.831/63.274/79.000, while +gating at thresholds 1000, 2000, and 4000 is identical at 51.469/55.202/130.875.
+Relative to Base, this corresponds to -6.362 HOTA, -8.072 IDF1, and +51.875 IDSW for all three threshold points.
+The overlap of 1000/2000/4000 indicates a plateau region under the current setup, so the default choice (2000) is in a stable regime rather than a single-point tuned setting.
+
+\begin{table}[t]
+\centering
+\caption{Gating-threshold sensitivity at seed=0 (Base and +gating).}
+\label{tab:gating_sensitivity}
+\input{tables/gating_sensitivity.tex}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.90\linewidth]{figs/gating_sensitivity.png}
+\caption{Sensitivity of +gating to threshold values (1000/2000/4000) at seed=0.}
+\label{fig:gating_sensitivity}
+\end{figure}
+
+\subsection{Stratified difficulty and failure modes}
+Figure~\ref{fig:stratified} answers RQ3 by showing bucket-wise metrics. For Base, high-risk buckets include turning (mid) (IDSW=627, CountMAE=4.795), low-confidence (mid) (IDSW=612, CountMAE=4.002), and occlusion (low) (IDSW=569, CountMAE=4.655).
+
+Relative to Base, +gating increases IDSW in the low-confidence (mid) bucket from 612 to 984 (+372) and raises CountMAE in occlusion (high) from 1.741 to 1.848 (+0.107). This indicates that low-confidence and turning regimes are key failure modes for identity consistency.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{figs/stratified_metrics_val.png}
+\caption{Stratified metrics over occlusion, density, turning, and low-confidence buckets; quantile and fallback notes are reported in \texttt{stratified\_metrics\_val.csv}.}
+\label{fig:stratified}
+\end{figure}
+
+\subsection{Counting stability}
+Table~\ref{tab:count} and Fig.~\ref{fig:count_png} answer RQ3 from a counting perspective. Mean CountMAE is 2.321 (Base), 2.379 (+gating), 2.375 (+traj), and 2.371 (+adaptive). Mean CountRMSE follows the same order (2.850, 2.916, 2.911, 2.906).
+
+\begin{table}[t]
+\centering
+\caption{Count stability summary (mean rows).}
+\label{tab:count}
+\input{tables/paper_count_table.tex}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.88\linewidth]{figs/count_stability_bar_paper.png}
+\caption{Count stability comparison.}
+\label{fig:count_png}
+\end{figure}
+
+\subsection{Runtime and resource profile}
+Figure~\ref{fig:runtime} answers RQ4. Base runs at 822.812 FPS with 548.992 MB peak memory and 2.157\% normalized CPU. +gating is 1182.212 FPS, 548.395 MB, 3.355\%. +traj and +adaptive are much heavier: 95.740/89.024 FPS and 734.211/733.199 MB, with CPU around 69.259\%/69.488\%.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/runtime_profile.png}
+\caption{Runtime profiling (FPS, memory, normalized CPU).}
+\label{fig:runtime}
+\end{figure}
+
+\section{Discussion: deployment guideline}
+The results support threshold-based deployment decisions.
+Gating-threshold selection is not ad hoc in this setup: the 1000/2000/4000 sweep falls in a plateau with identical +gating metrics, so using 2000 reflects stable behavior rather than single-point tuning.
+\begin{itemize}
+  \item \textbf{If target is at least 30 FPS and memory budget is up to 600 MB}: Base and +gating both satisfy constraints comfortably (822.8/1182.2 FPS; 549.0/548.4 MB).
+  \item \textbf{If heavier compute is acceptable} (e.g., server-side analysis): +traj/+adaptive can be considered, but their speed-memory-CPU costs are high and should be justified by task-specific value.
+  \item \textbf{Risk-aware monitoring}: low-confidence and turning buckets show strong IDSW growth (e.g., low-confidence (mid)), so online confidence alarms or conservative association policies are recommended in those conditions.
+\end{itemize}
+
+This closes an engineering decision loop from metrics to deployment policy: global benchmark + failure bucket diagnostics + resource budget.
+
+\section{Limitations}
+This study has several limitations. First, the evaluation scope is limited to the current val-half split and detector condition; broader domain shifts (different farms, sensors, water conditions) are not fully covered. Second, our variants do not show universal global metric gains in this frozen run, so conclusions are intentionally framed as trade-offs. Third, runtime profiling is collected on the current host and does not yet include dedicated edge hardware benchmarks. Fourth, although reproducibility metadata is strong, data sharing may still be constrained by upstream licensing.
+
+\section{Conclusion and future work}
+We presented a CEA-oriented, drift-proof evaluation framework for fish MOT and counting that prioritizes robustness-cost analysis, failure transparency, and deployment guidance over unsupported winner-takes-all claims. The framework combines fair baseline comparison, controlled degradation, stratified diagnostics, count stability, and runtime profiling within one auditable pipeline.
+
+Future work for the smart-aquaculture PhD direction includes: (i) multi-sensor fusion with environmental signals (e.g., dissolved oxygen and water temperature), (ii) anomaly behavior recognition with trajectory-context coupling, (iii) cross-pond/domain generalization, and (iv) online updating/calibration strategies under long-term deployment drift.
+
+\section{Data availability and reproducibility statement}
+\textbf{Code availability.} Source code and experiment scripts are available to editors/reviewers through an anonymized release package and will be publicly released upon acceptance under a permanent DOI.
+
+\textbf{Data availability.} Raw farm videos may be subject to licensing and operational restrictions. When redistribution is limited, we provide derived benchmark artifacts (predictions, per-sequence metrics, aggregated tables, and figure assets) required to reproduce every reported number.
+
+\textbf{Reproducibility package.} The package includes a locked run configuration, a manifest with provenance fields (\texttt{git\_commit=TESTCOMMIT1234567}) and cryptographic hashes (input entries=10, output entries=9), plus a one-click reproduction script. This bundle is intended to support independent result regeneration without manual path reconstruction.
+
+\section*{Appendix A. Release package}
+For editorial and reviewer access, the reproducibility bundle is shared via anonymized links and a placeholder DOI:
+\begin{itemize}
+  \item Placeholder DOI: \url{https://doi.org/10.5281/zenodo.XXXXXXX}
+  \item Anonymous review link: \url{https://anonymous.4open.science/r/FISH-MOT-RELEASE}
+\end{itemize}
+The release package contains run configuration, manifest and hash records, aggregated tables, paper assets, and one-click reproduction scripts.
+
+\section*{Funding}
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+
+\section*{Author contributions (CRediT)}
+Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Writing -- original draft, Writing -- review \& editing, Visualization: [Author 1]. Supervision, Project administration, Resources: [Author 2]. All authors read and approved the final manuscript.
+
+\section*{Competing interests}
+The authors declare no competing interests.
+
+\section*{Declaration of Generative AI and AI-assisted technologies in the manuscript preparation process}
+During the preparation of this work, the authors used OpenAI Codex/GPT-based tools to improve language clarity, section organization, and editorial consistency. All scientific content, experiment execution, numerical verification, and final editing decisions were manually performed and validated by the authors, who take full responsibility for the manuscript. No generative AI tools were used to create or modify figures, graphical abstracts, or other artwork in this manuscript.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+
+\end{document}

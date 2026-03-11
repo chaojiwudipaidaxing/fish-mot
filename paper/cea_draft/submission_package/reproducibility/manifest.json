@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "generated_at_utc": "2026-03-02T07:38:26.018181+00:00",
+  "command": "python scripts/make_paper_assets.py",
+  "cwd": "C:/Users/占子豪/Desktop/fish-mot",
+  "platform": {
+    "system": "Windows",
+    "release": "10",
+    "python": "3.11.9"
+  },
+  "git_commit": "TESTCOMMIT1234567",
+  "run_config": {
+    "schema_version": 1,
+    "generated_at_utc": "2026-03-02T06:19:29.953920+00:00",
+    "exp_id": "strong_baselines",
+    "result_name": "main_val",
+    "result_root": "results/main_val",
+    "mot_root": "data/mft25_mot_full",
+    "seed_root": "results/main_val/seed_runs",
+    "tables_dir": "results/main_val/tables",
+    "paper_assets_dir": "results/main_val/paper_assets",
+    "release_dir": "results/main_val/release",
+    "runtime_dir": "results/main_val/runtime",
+    "stratified_dir": "results/main_val/stratified",
+    "run_config_path": "results/main_val/run_config.json",
+    "split": "val_half",
+    "max_frames": 1000,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "drop_rate": 0.2,
+    "jitter": 0.02,
+    "gating_thresh": 2000.0,
+    "bucket_mode": "quantile",
+    "q1": 0.33,
+    "q2": 0.66,
+    "bucket_min_samples": 200,
+    "pred_root": "results/main_val/seed_runs/seed_0",
+    "methods": [
+      "bytetrack",
+      "ocsort",
+      "botsort"
+    ],
+    "git_commit": "TESTCOMMIT1234567",
+    "platform": {
+      "system": "Windows",
+      "release": "10",
+      "python": "3.11.9"
+    },
+    "cwd": "C:/Users/占子豪/Desktop/fish-mot"
+  },
+  "inputs": {
+    "main_table_seedmean": {
+      "path": "results/main_val/tables/main_table_val_seedmean.csv",
+      "size_bytes": 251,
+      "sha256": "0d217ce8d31e1c2f288b804c40aebf10717eaf46debca6be25241718593db79b",
+      "mtime_utc": "2026-03-02T06:07:45.278103+00:00"
+    },
+    "main_table_seedstd": {
+      "path": "results/main_val/tables/main_table_val_seedstd.csv",
+      "size_bytes": 228,
+      "sha256": "cb74395520c0bbd21d51778012b96716d2e48a0255798b722a516b5f6fbdfc1d",
+      "mtime_utc": "2026-03-02T06:07:45.278103+00:00"
+    },
+    "count_metrics": {
+      "path": "results/main_val/tables/count_metrics_val.csv",
+      "size_bytes": 2798,
+      "sha256": "51474e2f92ea7627418af9bd4f5a6a4d16fb9c409ac245c404557039185d2866",
+      "mtime_utc": "2026-03-02T06:07:46.389913+00:00"
+    },
+    "strong_baselines_seedmean": {
+      "path": "results/main_val/tables/strong_baselines_seedmean.csv",
+      "size_bytes": 203,
+      "sha256": "3bc990f2a51f9eaae9d2c54a55d577449ac1bda51bf999bb74807b50906278d8",
+      "mtime_utc": "2026-03-02T06:25:04.475815+00:00"
+    },
+    "strong_baselines_seedstd": {
+      "path": "results/main_val/tables/strong_baselines_seedstd.csv",
+      "size_bytes": 186,
+      "sha256": "f8ee7b8b42f1842ce151c6a33e2a8d32bf3c79a738da0b6b71dc4e8659008f6e",
+      "mtime_utc": "2026-03-02T06:25:04.475815+00:00"
+    },
+    "run_config": {
+      "path": "results/main_val/run_config.json",
+      "size_bytes": 1128,
+      "sha256": "5171539cda914266290557c190005bf5681d12f0fcdd9d8a355d482b59cf83ee",
+      "mtime_utc": "2026-03-02T06:19:29.973478+00:00"
+    },
+    "degradation_grid_csv": {
+      "path": "results/main_val/tables/degradation_grid.csv",
+      "size_bytes": 1231,
+      "sha256": "7c694018d152627b5d0d056c67a8968c53d03a1a676c5a01e12ec16cf36ab94f",
+      "mtime_utc": "2026-03-02T07:08:17.948108+00:00"
+    },
+    "degradation_grid_png": {
+      "path": "results/main_val/paper_assets/degradation_grid.png",
+      "size_bytes": 148796,
+      "sha256": "6547219903b9bdba7907b134ee0ac252744a8e7b74d3fb448b7c053395be1e1a",
+      "mtime_utc": "2026-03-02T07:08:18.192446+00:00"
+    },
+    "degradation_grid_tex": {
+      "path": "results/main_val/paper_assets/degradation_grid.tex",
+      "size_bytes": 1436,
+      "sha256": "ae1ef58960f4d3382105d12384ff8316c2e8148e713afc09185fe4ae5fdad7cb",
+      "mtime_utc": "2026-03-02T07:08:18.201967+00:00"
+    },
+    "main_table_with_baselines": {
+      "path": "results/main_val/tables/main_table_val_with_baselines.csv",
+      "size_bytes": 1285,
+      "sha256": "f0d91968ab8f627adeb8e0e3ba2e27cffdc90c5f887cad73e71a1fc62390ad99",
+      "mtime_utc": "2026-03-02T06:25:04.800791+00:00"
+    }
+  },
+  "outputs": {
+    "paper_main_table_csv": {
+      "path": "results/main_val/paper_assets/paper_main_table.csv",
+      "size_bytes": 789,
+      "sha256": "be91aa4b443f844c1e923bd1487e6a91833d0f946e7b307c4a3fc4258c637ae9",
+      "mtime_utc": "2026-03-02T07:38:25.595394+00:00"
+    },
+    "paper_main_table_tex": {
+      "path": "results/main_val/paper_assets/paper_main_table.tex",
+      "size_bytes": 557,
+      "sha256": "2dc529bd7b6a11cffa3d9e4ef81aec3dd6309d9e5777dbc2cc7461d0209819f7",
+      "mtime_utc": "2026-03-02T07:38:25.596387+00:00"
+    },
+    "paper_count_table_csv": {
+      "path": "results/main_val/paper_assets/paper_count_table.csv",
+      "size_bytes": 218,
+      "sha256": "b8147052aeb4a120d37ed26498bb8291417afeb197456fa6bc30c993084ab613",
+      "mtime_utc": "2026-03-02T07:38:25.596387+00:00"
+    },
+    "paper_count_table_tex": {
+      "path": "results/main_val/paper_assets/paper_count_table.tex",
+      "size_bytes": 333,
+      "sha256": "793bc73044cb690007c8638fbfe5f10ee120a701e68a310a2312b08483fac71e",
+      "mtime_utc": "2026-03-02T07:38:25.596387+00:00"
+    },
+    "paper_main_table_png": {
+      "path": "results/main_val/paper_assets/main_table_val_seedmean_std_paper.png",
+      "size_bytes": 36392,
+      "sha256": "be55d5b3cffe37cafc0c6d640c253032bb6baa3048e08cbf8ab05445bb816830",
+      "mtime_utc": "2026-03-02T07:38:25.849630+00:00"
+    },
+    "paper_count_png": {
+      "path": "results/main_val/paper_assets/count_stability_bar_paper.png",
+      "size_bytes": 39681,
+      "sha256": "156dee4399465241820df109d15c6cacb2d57363b9245d22e6bf34af3b4d0c04",
+      "mtime_utc": "2026-03-02T07:38:26.009179+00:00"
+    },
+    "merged_with_baselines_csv": {
+      "path": "results/main_val/tables/main_table_val_with_baselines.csv",
+      "size_bytes": 1285,
+      "sha256": "f0d91968ab8f627adeb8e0e3ba2e27cffdc90c5f887cad73e71a1fc62390ad99",
+      "mtime_utc": "2026-03-02T06:25:04.800791+00:00"
+    },
+    "degradation_grid_png": {
+      "path": "results/main_val/paper_assets/degradation_grid.png",
+      "size_bytes": 148796,
+      "sha256": "6547219903b9bdba7907b134ee0ac252744a8e7b74d3fb448b7c053395be1e1a",
+      "mtime_utc": "2026-03-02T07:08:18.192446+00:00"
+    },
+    "degradation_grid_tex": {
+      "path": "results/main_val/paper_assets/degradation_grid.tex",
+      "size_bytes": 1436,
+      "sha256": "ae1ef58960f4d3382105d12384ff8316c2e8148e713afc09185fe4ae5fdad7cb",
+      "mtime_utc": "2026-03-02T07:08:18.201967+00:00"
+    }
+  }
+}
