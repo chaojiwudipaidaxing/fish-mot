@@ -55,11 +55,11 @@
     ],
     "policy": "audit_ready_protocol"
   },
-  "git_commit": "TESTCOMMIT1234567",
+  "git_commit": "9d2ba2bb24b7461ef12f5e3f9a8a4675ce27ea15",
   "platform": {
     "system": "Windows",
     "release": "11",
     "python": "3.14.0"
   },
-  "cwd": "C:/Users/占子豪/Desktop/fish-mot"
+  "cwd": "C:/Users/\u5360\u5b50\u8c6a/Desktop/fish-mot"
 }

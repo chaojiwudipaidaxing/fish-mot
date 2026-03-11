@@ -1,0 +1,14 @@
+[PASS] EN file exists: out_cea_word_build2\CEA_manuscript_EN.docx
+[PASS] ZH file exists: out_cea_word_build2\CEA_manuscript_ZH_working.docx
+[PASS] EN PDF exists: out_cea_word_build2\CEA_manuscript_EN.pdf
+[PASS] ZH PDF exists: out_cea_word_build2\CEA_manuscript_ZH_working.pdf
+[PASS] Highlights exists: out_cea_word_build2\highlights.docx
+[PASS] EN no Calibri/theme font: bad_font_refs=0
+[PASS] EN single-column: multi_column_sections=0
+[PASS] EN formula integrity: omml=181 let_blank=1 let_blank_without_math=0
+[PASS] EN abstract/keywords: abstract_words=178 keyword_count=7
+[PASS] EN submission notes/data statement: highlights_note=True ga_note=True ga_callout=True data_statement=True
+[PASS] EN tables/captions: tables=25 pseudo_hits=0 images=8 image_captions=16
+[PASS] Highlights constraints: count=4 lengths=[79, 76, 77, 72]
+
+summary: total=12 fail=0

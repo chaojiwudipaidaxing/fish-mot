@@ -1,0 +1,4 @@
+﻿- Audit-ready protocol links fairness checks, stress tests, and deployment rules.
+- Drift-aware diagnostics localize failures by bucket and activation behavior.
+- Candidate threshold intervals are evaluated via activation-level diagnostics.
+- Scope A/B runtime reporting separates tracker cost from end-to-end cost.

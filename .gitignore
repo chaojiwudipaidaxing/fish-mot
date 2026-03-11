@@ -51,3 +51,9 @@ release_bundle_v1/out_*/
 # paper local exports
 paper/cea_draft/build/
 paper/cea_draft/*.pdf
+
+# local manuscript workspace noise
+/shuju/
+/tools/
+/todo.md
+/CEA_manuscript_ZH_working.pdf
