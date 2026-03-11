@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Profile runtime resources for Base/+gating/+traj/+adaptive trackers."""
+"""Profile runtime resources for the cumulative Base main-chain trackers."""
 
 from __future__ import annotations
 
@@ -18,12 +18,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import psutil
 
+from method_labels import MAIN_CHAIN_METHOD_ORDER, normalize_main_chain_rows
+
 
 METHODS: List[Tuple[str, Dict[str, str]]] = [
-    ("Base", {"gating": "off", "traj": "off", "beta": "0.0", "gamma": "0.0", "adaptive_gamma": "off"}),
-    ("+gating", {"gating": "on", "traj": "off", "beta": "0.02", "gamma": "0.0", "adaptive_gamma": "off"}),
-    ("+traj", {"gating": "on", "traj": "on", "beta": "0.02", "gamma": "0.5", "adaptive_gamma": "off"}),
-    ("+adaptive", {"gating": "on", "traj": "on", "beta": "0.02", "gamma": "0.5", "adaptive_gamma": "on"}),
+    (MAIN_CHAIN_METHOD_ORDER[0], {"gating": "off", "traj": "off", "beta": "0.0", "gamma": "0.0", "adaptive_gamma": "off"}),
+    (MAIN_CHAIN_METHOD_ORDER[1], {"gating": "on", "traj": "off", "beta": "0.02", "gamma": "0.0", "adaptive_gamma": "off"}),
+    (MAIN_CHAIN_METHOD_ORDER[2], {"gating": "on", "traj": "on", "beta": "0.02", "gamma": "0.5", "adaptive_gamma": "off"}),
+    (MAIN_CHAIN_METHOD_ORDER[3], {"gating": "on", "traj": "on", "beta": "0.02", "gamma": "0.5", "adaptive_gamma": "on"}),
 ]
 PLOT_DPI = 500
 PLOT_SAVE_KWARGS = {
@@ -370,7 +372,7 @@ def read_rows(path: Path) -> List[Dict[str, str]]:
     if not path.exists():
         raise FileNotFoundError(f"Missing CSV: {path}")
     with path.open("r", encoding="utf-8", newline="") as f:
-        return list(csv.DictReader(f))
+        return normalize_main_chain_rows(list(csv.DictReader(f)))
 
 
 def apply_plot_style() -> None:
@@ -415,7 +417,9 @@ def main() -> None:
     input_csv = args.input_csv if args.input_csv is not None else args.output_csv
     if args.plot_only:
         rows = read_rows(input_csv)
+        write_csv(args.output_csv, rows)
         make_plot(rows, args.plot_path)
+        print(f"Normalized runtime profile CSV: {args.output_csv}")
         print(f"Rendered runtime profile plot: {args.plot_path}")
         return
 

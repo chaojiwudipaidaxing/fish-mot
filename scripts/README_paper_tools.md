@@ -54,7 +54,7 @@ Notes:
   ```bat
   python scripts\make_paper_assets.py --run-config results\main_val\run_config.json --no-auto-rebuild-baselines
   ```
-- `manifest.json` now includes `run_config`, `git_commit`, and SHA256 for tracked inputs/outputs.
+- `manifest.json` now includes a manifest-safe snapshot of `run_config`, `git_commit`, and SHA256 for tracked inputs/outputs. The authoritative `run_config.json` is referenced by path inside the manifest instead of a nested SHA256, because `run_config.json` itself stores the resolved manifest hash.
 
 ## 2) Stratified bucket evaluation (smoke-first)
 

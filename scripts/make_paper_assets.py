@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import csv
 import hashlib
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -19,8 +21,10 @@ from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 
+from method_labels import MAIN_CHAIN_METHOD_ORDER, normalize_main_chain_label
 
-METHOD_ORDER = ["Base", "+gating", "+traj", "+adaptive"]
+
+METHOD_ORDER = MAIN_CHAIN_METHOD_ORDER
 STRONG_METHOD_ORDER = ["ByteTrack", "OC-SORT", "BoT-SORT"]
 MAIN_METRICS = ["HOTA", "DetA", "AssA", "IDF1", "IDSW"]
 COUNT_METRICS = ["CountMAE", "CountRMSE", "CountVar", "CountDrift"]
@@ -42,6 +46,9 @@ PLOT_STYLE = {
     "lines.linewidth": 1.2,
     "grid.linewidth": 0.4,
 }
+PLACEHOLDER_PROVENANCE_TOKENS = ("TESTCOMMIT", "PLACEHOLDER", "CHANGEME", "TODO")
+ANON_BUNDLE_RE = re.compile(r"anonymous_bundle_[A-Za-z0-9._-]+$")
+GIT_HASH_RE = re.compile(r"[0-9a-fA-F]{7,40}$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -236,9 +243,11 @@ def format_uncertainty_s(mean: float, std: float, decimals: int = 3) -> str:
 def select_by_method(rows: List[Dict[str, str]]) -> Dict[str, Dict[str, str]]:
     out: Dict[str, Dict[str, str]] = {}
     for row in rows:
-        method = row.get("method", "")
+        method = normalize_main_chain_label(row.get("method", ""))
         if method in METHOD_ORDER:
-            out[method] = row
+            copied = dict(row)
+            copied["method"] = method
+            out[method] = copied
     return out
 
 
@@ -246,9 +255,11 @@ def select_by_method_order(rows: List[Dict[str, str]], method_order: List[str]) 
     out: Dict[str, Dict[str, str]] = {}
     wanted = set(method_order)
     for row in rows:
-        method = row.get("method", "")
+        method = normalize_main_chain_label(row.get("method", ""))
         if method in wanted:
-            out[method] = row
+            copied = dict(row)
+            copied["method"] = method
+            out[method] = copied
     return out
 
 
@@ -481,10 +492,70 @@ def file_info(path: Path) -> Dict[str, object]:
     }
 
 
+def reference_only_file_info(path: Path, note: str) -> Dict[str, object]:
+    return {
+        "path": str(path).replace("\\", "/"),
+        "reference_policy": "path_only_no_nested_hash",
+        "note": note,
+    }
+
+
+def manifest_safe_run_config(run_cfg: Dict[str, object]) -> Dict[str, object]:
+    safe_cfg = copy.deepcopy(run_cfg)
+    manifest_hash = safe_cfg.get("manifest_hash")
+    if isinstance(manifest_hash, dict):
+        safe_cfg["manifest_hash"] = {
+            **manifest_hash,
+            "value": "pending_manifest_build",
+            "mode": "pending",
+            "note": (
+                "manifest snapshot keeps the run_config manifest_hash unresolved to avoid "
+                "a circular self-reference; see the authoritative run_config.json for the resolved value."
+            ),
+        }
+    return safe_cfg
+
+
+def write_resolved_manifest_hash(run_config_path: Path, manifest_path: Path) -> Dict[str, object] | None:
+    if not run_config_path.exists():
+        return None
+    run_cfg = json.loads(run_config_path.read_text(encoding="utf-8"))
+    manifest_hash = run_cfg.get("manifest_hash")
+    if not isinstance(manifest_hash, dict):
+        manifest_hash = {}
+    run_cfg["manifest_hash"] = {
+        **manifest_hash,
+        "path": str(manifest_path).replace("\\", "/"),
+        "algorithm": "sha256",
+        "value": sha256_file(manifest_path).upper(),
+        "mode": "current",
+        "note": "resolved against the emitted manifest.json file",
+    }
+    run_config_path.write_text(json.dumps(run_cfg, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return run_cfg
+
+
+def normalize_provenance_ref(value: str) -> str:
+    cleaned = str(value).strip()
+    if cleaned == "":
+        raise ValueError("Empty provenance reference is not allowed.")
+    upper = cleaned.upper()
+    if any(token in upper for token in PLACEHOLDER_PROVENANCE_TOKENS):
+        raise ValueError(f"Placeholder provenance reference is not allowed: {cleaned}")
+    if cleaned == "unknown":
+        return cleaned
+    if GIT_HASH_RE.fullmatch(cleaned) or ANON_BUNDLE_RE.fullmatch(cleaned):
+        return cleaned
+    raise ValueError(
+        "Provenance reference must be a git commit hash or a clearly named anonymous bundle ID. "
+        f"Received: {cleaned}"
+    )
+
+
 def get_git_commit() -> str:
     env_commit = os.environ.get("GIT_COMMIT")
     if env_commit not in (None, ""):
-        return str(env_commit).strip()
+        return normalize_provenance_ref(env_commit)
     try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -493,7 +564,7 @@ def get_git_commit() -> str:
             stderr=subprocess.PIPE,
             text=True,
         )
-        return result.stdout.strip()
+        return normalize_provenance_ref(result.stdout.strip())
     except Exception:  # noqa: BLE001
         return "unknown"
 
@@ -566,44 +637,28 @@ def write_release_files(
     outputs: List[Path] = []
     args.release_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest = {
-        "schema_version": 2,
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "command": "python scripts/make_paper_assets.py",
-        "cwd": str(Path.cwd()).replace("\\", "/"),
-        "platform": {
-            "system": platform.system(),
-            "release": platform.release(),
-            "python": platform.python_version(),
-        },
-        "git_commit": get_git_commit(),
-        "run_config": run_cfg,
-        "inputs": {},
-        "outputs": {},
-    }
-    for key, path in tracked_inputs.items():
-        if path.exists():
-            manifest["inputs"][key] = file_info(path)
-    for key, path in tracked_outputs.items():
-        if path.exists():
-            manifest["outputs"][key] = file_info(path)
-    manifest_path = args.release_dir / "manifest.json"
-    with manifest_path.open("w", encoding="utf-8", newline="\n") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
-        f.write("\n")
-    outputs.append(manifest_path)
-
     reproduce_path = args.release_dir / "reproduce.bat"
+
     def _win(path: Path) -> str:
         return str(path).replace("/", "\\")
 
     with reproduce_path.open("w", encoding="utf-8", newline="\n") as f:
         f.write("@echo off\n")
-        f.write("setlocal\n")
-        f.write("set \"REPO_ROOT=%~dp0..\"\n")
+        f.write("setlocal EnableExtensions\n")
+        f.write("set \"SCRIPT_DIR=%~dp0\"\n")
+        f.write("set \"REPO_ROOT=\"\n")
+        f.write("for %%I in (\"%SCRIPT_DIR%.\" \"%SCRIPT_DIR%..\" \"%SCRIPT_DIR%..\\..\" \"%SCRIPT_DIR%..\\..\\..\" \"%SCRIPT_DIR%..\\..\\..\\..\" \"%SCRIPT_DIR%..\\..\\..\\..\\..\") do (\n")
+        f.write("  if not defined REPO_ROOT if exist \"%%~fI\\scripts\\make_paper_assets.py\" set \"REPO_ROOT=%%~fI\"\n")
+        f.write(")\n")
+        f.write("if not defined REPO_ROOT (\n")
+        f.write("  echo [ERR] Could not locate repository root from \"%SCRIPT_DIR%\".\n")
+        f.write("  exit /b 1\n")
+        f.write(")\n")
         f.write("pushd \"%REPO_ROOT%\"\n")
+        f.write("set \"PY_EXE=python\"\n")
+        f.write("if exist \"%REPO_ROOT%\\.venv\\Scripts\\python.exe\" set \"PY_EXE=%REPO_ROOT%\\.venv\\Scripts\\python.exe\"\n")
         f.write(
-            "python scripts\\make_paper_assets.py "
+            "\"%PY_EXE%\" scripts\\make_paper_assets.py "
             f"--main-mean {_win(args.main_mean)} "
             f"--main-std {_win(args.main_std)} "
             f"--count-csv {_win(args.count_csv)} "
@@ -622,7 +677,7 @@ def write_release_files(
         if args.degradation_csv and args.degradation_csv.exists():
             f.write(":: === Degradation Grid (auto) START ===\n")
             f.write(
-                "python scripts\\run_degradation_grid.py "
+                "\"%PY_EXE%\" scripts\\run_degradation_grid.py "
                 f"--run-config {_win(args.run_config)}\n"
             )
             f.write("if errorlevel 1 (\n")
@@ -631,11 +686,75 @@ def write_release_files(
             f.write("  exit /b 1\n")
             f.write(")\n")
             f.write(":: === Degradation Grid (auto) END ===\n")
+        tables_dir = Path(str(run_cfg.get("tables_dir", Path(str(run_cfg.get("result_root", "results/main_val"))) / "tables")))
+        if (tables_dir / "gating_thresh_sensitivity.csv").exists():
+            f.write(":: === Gating Threshold Sensitivity (auto) START ===\n")
+            f.write(
+                "\"%PY_EXE%\" scripts\\run_gating_thresh_sensitivity.py "
+                f"--run-config {_win(args.run_config)}\n"
+            )
+            f.write("if errorlevel 1 (\n")
+            f.write("  echo run_gating_thresh_sensitivity failed.\n")
+            f.write("  popd\n")
+            f.write("  exit /b 1\n")
+            f.write(")\n")
+            f.write(":: === Gating Threshold Sensitivity (auto) END ===\n")
+        if (tables_dir / "degradation_extended.csv").exists():
+            f.write(":: === Degradation Extended (auto) START ===\n")
+            f.write(
+                "\"%PY_EXE%\" scripts\\run_degradation_extended.py "
+                f"--run-config {_win(args.run_config)}\n"
+            )
+            f.write("if errorlevel 1 (\n")
+            f.write("  echo run_degradation_extended failed.\n")
+            f.write("  popd\n")
+            f.write("  exit /b 1\n")
+            f.write(")\n")
+            f.write(":: === Degradation Extended (auto) END ===\n")
         f.write("echo Done.\n")
         f.write("popd\n")
         f.write("exit /b 0\n")
     outputs.append(reproduce_path)
 
+    manifest_path = args.release_dir / "manifest.json"
+    manifest = {
+        "schema_version": 2,
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "command": "python scripts/make_paper_assets.py",
+        "cwd": str(Path.cwd()).replace("\\", "/"),
+        "platform": {
+            "system": platform.system(),
+            "release": platform.release(),
+            "python": platform.python_version(),
+        },
+        "git_commit": get_git_commit(),
+        "run_config": manifest_safe_run_config(run_cfg),
+        "inputs": {},
+        "outputs": {},
+    }
+    for key, path in tracked_inputs.items():
+        if not path.exists():
+            continue
+        if key == "run_config":
+            manifest["inputs"][key] = reference_only_file_info(
+                path,
+                "The authoritative run_config.json stores the resolved manifest SHA256, so the manifest records it by path only to avoid a circular nested hash.",
+            )
+        else:
+            manifest["inputs"][key] = file_info(path)
+
+    tracked_outputs = dict(tracked_outputs)
+    tracked_outputs["reproduce_bat"] = reproduce_path
+    for key, path in tracked_outputs.items():
+        if path.exists():
+            manifest["outputs"][key] = file_info(path)
+
+    with manifest_path.open("w", encoding="utf-8", newline="\n") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    outputs.append(manifest_path)
+
+    write_resolved_manifest_hash(args.run_config, manifest_path)
     return outputs
 
 
@@ -723,6 +842,21 @@ def main() -> None:
         tracked_outputs["degradation_grid_png"] = args.degradation_plot
     if args.degradation_tex and args.degradation_tex.exists():
         tracked_outputs["degradation_grid_tex"] = args.degradation_tex
+    tables_dir = Path(str(run_cfg.get("tables_dir", Path(str(run_cfg.get("result_root", "results/main_val"))) / "tables")))
+    paper_assets_dir = Path(str(run_cfg.get("paper_assets_dir", Path(str(run_cfg.get("result_root", "results/main_val"))) / "paper_assets")))
+    optional_release_outputs = {
+        "gating_sensitivity_csv": tables_dir / "gating_thresh_sensitivity.csv",
+        "gating_sensitivity_tex": paper_assets_dir / "gating_thresh_sensitivity.tex",
+        "gating_sensitivity_png": paper_assets_dir / "gating_thresh_sensitivity.png",
+        "degradation_extended_csv": tables_dir / "degradation_extended.csv",
+        "degradation_extended_tex": paper_assets_dir / "degradation_extended_delta.tex",
+        "degradation_extended_png": paper_assets_dir / "degradation_extended.png",
+        "degradation_extended_examples_png": paper_assets_dir / "degradation_extended_examples.png",
+        "degradation_extended_manuscript_txt": tables_dir / "degradation_extended_manuscript.txt",
+    }
+    for key, path in optional_release_outputs.items():
+        if path.exists():
+            tracked_outputs[key] = path
     outputs.extend(write_release_files(args, outputs, run_cfg=run_cfg, tracked_inputs=tracked_inputs, tracked_outputs=tracked_outputs))
     referenced_assets: List[Path] = []
     for maybe_path in (args.degradation_csv, args.degradation_plot, args.degradation_tex):

@@ -162,6 +162,24 @@ def parse_args() -> argparse.Namespace:
         help="Random seed used for detection degradation.",
     )
     parser.add_argument(
+        "--motion-blur",
+        type=float,
+        default=0.0,
+        help="Deterministic motion-blur proxy severity in [0, 1] applied in detection space.",
+    )
+    parser.add_argument(
+        "--darken",
+        type=float,
+        default=0.0,
+        help="Deterministic low-illumination proxy severity in [0, 1] applied in detection space.",
+    )
+    parser.add_argument(
+        "--haze",
+        type=float,
+        default=0.0,
+        help="Deterministic low-contrast / turbidity proxy severity in [0, 1] applied in detection space.",
+    )
+    parser.add_argument(
         "--out-dir",
         type=Path,
         default=Path("results/baseline/pred"),
@@ -275,17 +293,83 @@ def degrade_detections(
     detections_xywh: List[np.ndarray],
     drop_rate: float,
     jitter: float,
+    motion_blur: float,
+    darken: float,
+    haze: float,
+    frame_idx: int,
     image_w: int,
     image_h: int,
     rng: np.random.Generator,
 ) -> List[np.ndarray]:
     if not detections_xywh:
         return []
+
+    def clamp_bbox(x: float, y: float, w: float, h: float) -> tuple[float, float, float, float]:
+        x = max(0.0, min(x, float(image_w) - 1.0))
+        y = max(0.0, min(y, float(image_h) - 1.0))
+        w = max(1.0, min(w, float(image_w) - x))
+        h = max(1.0, min(h, float(image_h) - y))
+        return x, y, w, h
+
+    def small_object_weight(w: float, h: float) -> float:
+        area_ratio = (w * h) / max(1.0, float(image_w) * float(image_h))
+        if area_ratio <= 0.0:
+            return 1.8
+        ref_ratio = 0.0025
+        return float(np.clip(np.sqrt(ref_ratio / area_ratio), 0.6, 1.8))
+
+    frame_phase = 0.23 * float(frame_idx)
+    haze_dx = float(rng.uniform(-1.0, 1.0)) * haze * 0.008 * float(image_w)
+    haze_dy = float(rng.uniform(-1.0, 1.0)) * haze * 0.008 * float(image_h)
     out: List[np.ndarray] = []
     for det in detections_xywh:
         if drop_rate > 0.0 and float(rng.random()) < drop_rate:
             continue
         x, y, w, h = [float(v) for v in det]
+        size_weight = small_object_weight(w, h)
+
+        if darken > 0.0:
+            dark_drop = min(0.85, darken * 0.35 * size_weight)
+            if float(rng.random()) < dark_drop:
+                continue
+            shrink = max(0.55, 1.0 - darken * (0.10 + 0.04 * size_weight))
+            cx = x + w / 2.0
+            cy = y + h / 2.0
+            w = max(1.0, w * shrink)
+            h = max(1.0, h * shrink)
+            x = cx - w / 2.0
+            y = cy - h / 2.0
+
+        if motion_blur > 0.0:
+            angle = float(rng.uniform(-np.pi, np.pi)) + frame_phase
+            axis_major = abs(np.cos(angle)) >= abs(np.sin(angle))
+            shift = motion_blur * 0.55 * max(w, h)
+            cx = x + w / 2.0 + np.cos(angle) * shift
+            cy = y + h / 2.0 + np.sin(angle) * shift * 0.7
+            stretch = 1.0 + 1.20 * motion_blur
+            squeeze = max(0.65, 1.0 - 0.20 * motion_blur)
+            if axis_major:
+                w = max(1.0, w * stretch)
+                h = max(1.0, h * squeeze)
+            else:
+                h = max(1.0, h * stretch)
+                w = max(1.0, w * squeeze)
+            x = cx - w / 2.0
+            y = cy - h / 2.0
+            blur_drop = min(0.60, motion_blur * 0.18 * size_weight)
+            if float(rng.random()) < blur_drop:
+                continue
+
+        if haze > 0.0:
+            x = x + haze_dx + float(rng.normal(0.0, haze * 0.05 * max(1.0, w)))
+            y = y + haze_dy + float(rng.normal(0.0, haze * 0.05 * max(1.0, h)))
+            inflate = 1.0 + 0.35 * haze
+            w = max(1.0, w * inflate)
+            h = max(1.0, h * inflate)
+            haze_drop = min(0.75, haze * 0.22 * (0.7 + 0.3 * size_weight))
+            if float(rng.random()) < haze_drop:
+                continue
+
         if jitter > 0.0:
             jx = float(rng.uniform(-jitter, jitter)) * w
             jy = float(rng.uniform(-jitter, jitter)) * h
@@ -296,10 +380,7 @@ def degrade_detections(
             w = max(1.0, w * jw)
             h = max(1.0, h * jh)
 
-        x = max(0.0, min(x, float(image_w) - 1.0))
-        y = max(0.0, min(y, float(image_h) - 1.0))
-        w = max(1.0, min(w, float(image_w) - x))
-        h = max(1.0, min(h, float(image_h) - y))
+        x, y, w, h = clamp_bbox(x, y, w, h)
         out.append(np.array([x, y, w, h], dtype=float))
     return out
 
@@ -756,6 +837,9 @@ def run_sequence(
     traj_model: TrajCostModel | None,
     drop_rate: float,
     jitter: float,
+    motion_blur: float,
+    darken: float,
+    haze: float,
     rng_seed: int,
     max_frames: int,
     frame_stats: bool,
@@ -811,6 +895,10 @@ def run_sequence(
             detections_xywh=raw_dets,
             drop_rate=drop_rate,
             jitter=jitter,
+            motion_blur=motion_blur,
+            darken=darken,
+            haze=haze,
+            frame_idx=frame,
             image_w=im_w,
             image_h=im_h,
             rng=rng,
@@ -834,7 +922,8 @@ def run_sequence(
     raw_det_count = sum(len(v) for v in detections.values())
     print(
         f"[baseline_sort] {seq}: frames={seq_length}, dets={raw_det_count}, "
-        f"pred_rows={len(outputs)}, out={out_file}, drop_rate={drop_rate:.3f}, jitter={jitter:.3f}, det={chosen_det}"
+        f"pred_rows={len(outputs)}, out={out_file}, drop_rate={drop_rate:.3f}, jitter={jitter:.3f}, "
+        f"motion_blur={motion_blur:.3f}, darken={darken:.3f}, haze={haze:.3f}, det={chosen_det}"
     )
     return seq_length, len(outputs)
 
@@ -869,6 +958,12 @@ def main() -> None:
         raise ValueError("--drop-rate must be in [0, 1).")
     if args.jitter < 0.0:
         raise ValueError("--jitter must be >= 0.")
+    if not (0.0 <= args.motion_blur <= 1.0):
+        raise ValueError("--motion-blur must be in [0, 1].")
+    if not (0.0 <= args.darken <= 1.0):
+        raise ValueError("--darken must be in [0, 1].")
+    if not (0.0 <= args.haze <= 1.0):
+        raise ValueError("--haze must be in [0, 1].")
     if args.traj == "on" and not args.traj_encoder.exists():
         raise FileNotFoundError(f"Trajectory encoder checkpoint not found: {args.traj_encoder}")
 
@@ -902,6 +997,9 @@ def main() -> None:
             traj_model=traj_model,
             drop_rate=args.drop_rate,
             jitter=args.jitter,
+            motion_blur=args.motion_blur,
+            darken=args.darken,
+            haze=args.haze,
             rng_seed=(args.degrade_seed + seq_idx),
             max_frames=args.max_frames,
             frame_stats=(args.frame_stats == "on"),
@@ -916,7 +1014,8 @@ def main() -> None:
         f"traj={args.traj}, adaptive_gamma={args.adaptive_gamma}, frame_stats={args.frame_stats}, "
         f"alpha={args.alpha:.3f}, beta={args.beta:.3f}, gamma={args.gamma:.3f}, "
         f"gamma_clamp=[{args.adaptive_gamma_min:.3f},{args.adaptive_gamma_max:.3f}], "
-        f"drop_rate={args.drop_rate:.3f}, jitter={args.jitter:.3f}, seed={args.degrade_seed}"
+        f"drop_rate={args.drop_rate:.3f}, jitter={args.jitter:.3f}, motion_blur={args.motion_blur:.3f}, "
+        f"darken={args.darken:.3f}, haze={args.haze:.3f}, seed={args.degrade_seed}"
     )
 
 

@@ -12,6 +12,8 @@ from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 
+from method_labels import MAIN_CHAIN_METHOD_ORDER, normalize_main_chain_label
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Aggregate per-seed main_table_val outputs.")
@@ -128,7 +130,7 @@ def main() -> None:
         raise RuntimeError("No seeds specified.")
 
     metric_names = ["HOTA", "DetA", "AssA", "IDF1", "IDSW"]
-    methods_order = ["Base", "+gating", "+traj", "+adaptive"]
+    methods_order = MAIN_CHAIN_METHOD_ORDER
 
     by_method: Dict[str, Dict[str, List[float]]] = {}
     split_name = "val_half"
@@ -140,7 +142,7 @@ def main() -> None:
         per_seq_table = seed_dir / "per_seq_main_val.csv"
         rows = read_rows(main_table)
         for row in rows:
-            method = row["method"]
+            method = normalize_main_chain_label(row["method"])
             split_name = row.get("split", split_name)
             if method not in by_method:
                 by_method[method] = {m: [] for m in metric_names}
@@ -150,6 +152,7 @@ def main() -> None:
         seq_rows = read_rows(per_seq_table)
         for row in seq_rows:
             out_row = dict(row)
+            out_row["method"] = normalize_main_chain_label(out_row["method"])
             out_row["seed"] = seed
             combined_per_seq.append(out_row)
 

@@ -10,6 +10,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+from method_labels import MAIN_CHAIN_METHOD_ORDER, normalize_main_chain_label
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TABLE_DIR = REPO_ROOT / "results" / "main_val" / "tables"
 DEFAULT_OUT_DIR = REPO_ROOT / "paper" / "cea_draft" / "figures"
@@ -99,7 +101,7 @@ def _plot_grouped_bars(
 def _rows_to_metric_map(rows: list[dict[str, str]], metrics: list[str]) -> dict[str, dict[str, float]]:
     out: dict[str, dict[str, float]] = {}
     for row in rows:
-        method = row["method"]
+        method = normalize_main_chain_label(row["method"])
         out[method] = {metric: float(row[metric]) for metric in metrics}
     return out
 
@@ -108,7 +110,7 @@ def _rows_to_combined_maps(rows: list[dict[str, str]], metrics: list[str]) -> tu
     mean_map: dict[str, dict[str, float]] = {}
     std_map: dict[str, dict[str, float]] = {}
     for row in rows:
-        method = row["method"]
+        method = normalize_main_chain_label(row["method"])
         mean_map[method] = {metric: float(row[f"{metric}_mean"]) for metric in metrics}
         std_map[method] = {metric: float(row[f"{metric}_std"]) for metric in metrics}
     return mean_map, std_map
@@ -120,7 +122,7 @@ def main() -> None:
 
     core_mean = _rows_to_metric_map(_read_rows(args.table_dir / "main_table_val_seedmean.csv"), metrics)
     core_std = _rows_to_metric_map(_read_rows(args.table_dir / "main_table_val_seedstd.csv"), metrics)
-    core_methods = ["Base", "+gating", "+traj", "+adaptive"]
+    core_methods = MAIN_CHAIN_METHOD_ORDER
     _plot_grouped_bars(
         core_methods,
         metrics,
@@ -144,7 +146,7 @@ def main() -> None:
 
     combined_rows = _read_rows(args.table_dir / "main_table_val_with_baselines.csv")
     combined_mean, combined_std = _rows_to_combined_maps(combined_rows, metrics)
-    combined_methods = ["Base", "+gating", "+traj", "+adaptive", "ByteTrack", "OC-SORT", "BoT-SORT"]
+    combined_methods = MAIN_CHAIN_METHOD_ORDER + ["ByteTrack", "OC-SORT", "BoT-SORT"]
     _plot_grouped_bars(
         combined_methods,
         metrics,

@@ -292,7 +292,7 @@ def upsert_reproduce_section(reproduce_bat: Path, run_config_path: Path) -> None
     run_cfg_win = str(run_config_path).replace("/", "\\")
     section = [
         start,
-        f"python scripts\\run_degradation_grid.py --run-config {run_cfg_win}",
+        f"\"%PY_EXE%\" scripts\\run_degradation_grid.py --run-config {run_cfg_win}",
         "if errorlevel 1 (",
         "  echo run_degradation_grid failed.",
         "  popd",
@@ -305,9 +305,19 @@ def upsert_reproduce_section(reproduce_bat: Path, run_config_path: Path) -> None
         reproduce_bat.parent.mkdir(parents=True, exist_ok=True)
         lines = [
             "@echo off",
-            "setlocal",
-            'set "REPO_ROOT=%~dp0.."',
+            "setlocal EnableExtensions",
+            'set "SCRIPT_DIR=%~dp0"',
+            'set "REPO_ROOT="',
+            'for %%I in ("%SCRIPT_DIR%." "%SCRIPT_DIR%.." "%SCRIPT_DIR%..\\.." "%SCRIPT_DIR%..\\..\\.." "%SCRIPT_DIR%..\\..\\..\\.." "%SCRIPT_DIR%..\\..\\..\\..\\..") do (',
+            '  if not defined REPO_ROOT if exist "%%~fI\\scripts\\make_paper_assets.py" set "REPO_ROOT=%%~fI"',
+            ")",
+            "if not defined REPO_ROOT (",
+            '  echo [ERR] Could not locate repository root from "%SCRIPT_DIR%".',
+            "  exit /b 1",
+            ")",
             'pushd "%REPO_ROOT%"',
+            'set "PY_EXE=python"',
+            'if exist "%REPO_ROOT%\\.venv\\Scripts\\python.exe" set "PY_EXE=%REPO_ROOT%\\.venv\\Scripts\\python.exe"',
             *section,
             "echo Done.",
             "popd",

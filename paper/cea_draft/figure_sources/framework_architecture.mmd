@@ -1,0 +1,12 @@
+flowchart LR
+  A["Video input\nPond video stream\nframe decode"] --> B["Detector output\nfish boxes + scores"]
+  B --> C["Tracking core\nKalman predict\nHungarian assignment\nstate update"]
+  C --> D["Optional modules\nMahalanobis gating\ntrajectory cue\nadaptive weighting"]
+  D --> E["Evaluation and diagnostics\nHOTA / IDF1 / IDSW\nCount stability\ndegradation robustness\nruntime profile"]
+  E --> F["Deployment recommendation\nBase or conservative profile\naudit-ready release bundle"]
+  G["Audit-ready protocol\nrun_config.json\nmanifest_hash\nseed_locking"] -. audit trail .-> C
+  G -. reproducibility .-> E
+  classDef main fill:#e8f0f8,stroke:#5e6670,color:#24303a;
+  classDef support fill:#f7f8fa,stroke:#8a98a6,color:#24303a;
+  class A,B,C,D,E,F main;
+  class G support;

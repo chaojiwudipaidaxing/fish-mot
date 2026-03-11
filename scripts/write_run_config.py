@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,9 @@ from typing import List
 
 
 DEFAULT_GATING_THRESH = 9.210340371976184
+PLACEHOLDER_PROVENANCE_TOKENS = ("TESTCOMMIT", "PLACEHOLDER", "CHANGEME", "TODO")
+ANON_BUNDLE_RE = re.compile(r"anonymous_bundle_[A-Za-z0-9._-]+$")
+GIT_HASH_RE = re.compile(r"[0-9a-fA-F]{7,40}$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -69,6 +73,12 @@ def parse_args() -> argparse.Namespace:
         help="Optional explicit manifest path. Default: <release_dir>/manifest.json",
     )
     parser.add_argument("--manifest-algorithm", default="sha256", help="Manifest hash algorithm.")
+    parser.add_argument(
+        "--manifest-hash-mode",
+        default="pending",
+        choices=["pending", "current"],
+        help="How to populate run_config.manifest_hash before manifest emission.",
+    )
     parser.add_argument("--seed-locking-mode", default="fixed_list", help="Seed locking mode recorded for audit.")
     parser.add_argument(
         "--seed-locking-policy",
@@ -111,13 +121,30 @@ def parse_method_list(raw: str) -> List[str]:
     return out
 
 
+def normalize_provenance_ref(value: str) -> str:
+    cleaned = str(value).strip()
+    if cleaned == "":
+        raise ValueError("Empty provenance reference is not allowed.")
+    upper = cleaned.upper()
+    if any(token in upper for token in PLACEHOLDER_PROVENANCE_TOKENS):
+        raise ValueError(f"Placeholder provenance reference is not allowed: {cleaned}")
+    if cleaned == "unknown":
+        return cleaned
+    if GIT_HASH_RE.fullmatch(cleaned) or ANON_BUNDLE_RE.fullmatch(cleaned):
+        return cleaned
+    raise ValueError(
+        "Provenance reference must be a git commit hash or a clearly named anonymous bundle ID. "
+        f"Received: {cleaned}"
+    )
+
+
 def get_git_commit() -> str:
     env_commit = os.environ.get("GIT_COMMIT")
     if env_commit not in (None, ""):
-        return str(env_commit).strip()
+        return normalize_provenance_ref(env_commit)
     try:
         out = subprocess.check_output(["git", "rev-parse", "HEAD"], stderr=subprocess.STDOUT)
-        return out.decode("utf-8").strip()
+        return normalize_provenance_ref(out.decode("utf-8").strip())
     except Exception:  # noqa: BLE001
         return "unknown"
 
@@ -131,17 +158,24 @@ def resolve_gating_thresh(explicit: float | None) -> float:
     return float(DEFAULT_GATING_THRESH)
 
 
-def resolve_manifest_hash(manifest_path: Path, algorithm: str) -> dict[str, str]:
+def resolve_manifest_hash(manifest_path: Path, algorithm: str, mode: str) -> dict[str, str]:
     algo = str(algorithm).strip().lower()
     if algo != "sha256":
         raise ValueError(f"Unsupported manifest hash algorithm: {algorithm}")
-    value = "pending"
-    if manifest_path.exists():
+    resolved_mode = str(mode).strip().lower()
+    if resolved_mode not in {"pending", "current"}:
+        raise ValueError(f"Unsupported manifest hash mode: {mode}")
+    value = "pending_manifest_build"
+    note = "resolved after manifest.json emission by scripts/make_paper_assets.py"
+    if resolved_mode == "current" and manifest_path.exists():
         value = hashlib.sha256(manifest_path.read_bytes()).hexdigest().upper()
+        note = "resolved against the current manifest.json file"
     return {
         "path": str(manifest_path).replace("\\", "/"),
         "algorithm": algo,
         "value": value,
+        "mode": resolved_mode,
+        "note": note,
     }
 
 
@@ -193,7 +227,7 @@ def main() -> None:
         "bucket_min_samples": int(args.bucket_min_samples),
         "pred_root": str(pred_root).replace("\\", "/"),
         "methods": parse_method_list(args.methods),
-        "manifest_hash": resolve_manifest_hash(manifest_path, args.manifest_algorithm),
+        "manifest_hash": resolve_manifest_hash(manifest_path, args.manifest_algorithm, args.manifest_hash_mode),
         "seed_locking": {
             "enabled": True,
             "mode": args.seed_locking_mode,

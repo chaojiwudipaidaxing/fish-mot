@@ -20,7 +20,10 @@
 
 \title{A drift-proof and deployment-oriented evaluation framework for fish multi-object tracking in digital aquaculture}
 
-\author{Anonymous Author(s)}
+\author[aff1]{Zihao Zhan\corref{cor1}}
+\cortext[cor1]{Corresponding author.}
+\ead{2603912826@qq.com}
+\address[aff1]{College of Fisheries, Huazhong Agricultural University, China}
 
 \begin{abstract}
 This study presents an investigator-developed evaluation framework for fish multi-object tracking and counting in digital aquaculture, centered on auditable protocol design and deployment decision rules. Rather than claiming across-the-board gains, we integrate run-configuration locking, data-drift gates, manifest hash tracing, controlled detector degradation (drop/jitter), quantile stratified difficulty analysis, count stability metrics, and runtime profiling in one reproducible pipeline. On a frozen val-half snapshot (8 sequences, 1000 frames each, seeds 0/1/2), Base reports HOTA 58.232\,$\pm$\,0.304 and IDF1 64.042\,$\pm$\,0.550, while ByteTrack reports HOTA 58.431\,$\pm$\,0.291 and IDF1 64.011\,$\pm$\,0.545. The +gating/+traj/+adaptive variants expose explicit trade-offs rather than monotonic gains. Controlled degradation and bucketed diagnostics show where failures accumulate (especially low-confidence and turning regimes), while runtime profiling separates lightweight options (Base, +gating) from high-cost options (+traj, +adaptive). We translate these observations into threshold-based guidance for CPU/edge deployment under frame-rate and memory constraints. The resulting contribution is an engineering evidence framework that links fairness, stress testing, failure interpretation, and reproducible release artifacts for smart aquaculture.
@@ -239,25 +242,21 @@ We presented a CEA-oriented, drift-proof evaluation framework for fish MOT and c
 Future work for the smart-aquaculture PhD direction includes: (i) multi-sensor fusion with environmental signals (e.g., dissolved oxygen and water temperature), (ii) anomaly behavior recognition with trajectory-context coupling, (iii) cross-pond/domain generalization, and (iv) online updating/calibration strategies under long-term deployment drift.
 
 \section{Data availability and reproducibility statement}
-\textbf{Code availability.} Source code and experiment scripts are available to editors/reviewers through an anonymized release package and will be publicly released upon acceptance under a permanent DOI.
+\textbf{Code availability.} Source code and experiment scripts are included in the submission reproducibility package for editorial technical verification. A public repository and archival record will be released after acceptance.
 
 \textbf{Data availability.} Raw farm videos may be subject to licensing and operational restrictions. When redistribution is limited, we provide derived benchmark artifacts (predictions, per-sequence metrics, aggregated tables, and figure assets) required to reproduce every reported number.
 
-\textbf{Reproducibility package.} The package includes a locked run configuration, a manifest with provenance fields (\texttt{git\_commit=TESTCOMMIT1234567}) and cryptographic hashes (input entries=10, output entries=9), plus a one-click reproduction script. This bundle is intended to support independent result regeneration without manual path reconstruction.
+\textbf{Reproducibility package.} The package includes a locked run configuration, a manifest with provenance fields and cryptographic hashes, plus a one-click reproduction script. This bundle is intended to support independent result regeneration without manual path reconstruction.
 
 \section*{Appendix A. Release package}
-For editorial and reviewer access, the reproducibility bundle is shared via anonymized links and a placeholder DOI:
-\begin{itemize}
-  \item Placeholder DOI: \url{https://doi.org/10.5281/zenodo.XXXXXXX}
-  \item Anonymous review link: \url{https://anonymous.4open.science/r/FISH-MOT-RELEASE}
-\end{itemize}
+For editorial technical check, the reproducibility bundle is included in the submission materials under the fixed identifier \texttt{release\_bundle\_v1}.
 The release package contains run configuration, manifest and hash records, aggregated tables, paper assets, and one-click reproduction scripts.
 
 \section*{Funding}
 This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 
 \section*{Author contributions (CRediT)}
-Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Writing -- original draft, Writing -- review \& editing, Visualization: [Author 1]. Supervision, Project administration, Resources: [Author 2]. All authors read and approved the final manuscript.
+Zihao Zhan: Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Writing -- original draft, Writing -- review \& editing, Visualization. The author read and approved the final manuscript.
 
 \section*{Competing interests}
 The authors declare no competing interests.

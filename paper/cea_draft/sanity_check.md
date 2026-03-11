@@ -1,6 +1,6 @@
 # Sanity Check (section-level traceability)
 
-RESULTS_ROOT = `results/archive/main_val_20260302_TESTCOMMIT1234567_final2`
+RESULTS_ROOT = `results/main_val`
 
 ## 0) Abstract numbers traceability
 
@@ -100,9 +100,9 @@ RESULTS_ROOT = `results/archive/main_val_20260302_TESTCOMMIT1234567_final2`
 
 ## 7) Reproducibility statement (source: `release/manifest.json`)
 
-- git_commit: `TESTCOMMIT1234567`
-- input hash count: 10
-- output hash count: 9
+- git_commit: `d03740f78ed83caa11f727f9f7f060491434b199`
+- input entries: 10 total (`sha256` on 9 entries; `run_config.json` recorded by path-only policy to avoid a circular nested hash)
+- output hash count: 18
 
 ## 8) Path integrity self-check (`main.tex`)
 - Check 1: no `results/main_val` or `results\main_val` literal.

@@ -1,0 +1,14 @@
+flowchart LR
+  A["Predicted track state\nx_i^- , S_i"] --> C["Mahalanobis gating score\nd_ij = (z_j - H x_i^-)^T S_i^-1 (z_j - H x_i^-)"]
+  B["Candidate detections\nz_j"] --> C
+  C --> D{"d_ij <= tau_g ?"}
+  D -- yes --> E["Keep candidate\nfor assignment"]
+  D -- no --> F["Reject association"]
+  E --> G["Hungarian matching\nand track update"]
+  F --> H["Log reject counts\nscore tails\ntrigger statistics"]
+  G --> H
+  H --> I["Diagnostic summary\nfor drift monitoring\nand audit review"]
+  classDef main fill:#e8f0f8,stroke:#5e6670,color:#24303a;
+  classDef support fill:#f7f8fa,stroke:#8a98a6,color:#24303a;
+  class A,B,C,E,G,I main;
+  class D,F,H support;

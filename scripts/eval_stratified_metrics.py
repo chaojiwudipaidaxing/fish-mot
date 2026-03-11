@@ -15,6 +15,8 @@ from typing import Dict, List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+from method_labels import MAIN_CHAIN_METHOD_ORDER
 from scipy.optimize import linear_sum_assignment
 
 
@@ -92,19 +94,19 @@ def parse_args() -> argparse.Namespace:
         "--pred-gating",
         type=Path,
         default=Path("results/p3/pred_gating_hard"),
-        help="Prediction directory for +gating.",
+        help="Prediction directory for Base+gating.",
     )
     parser.add_argument(
         "--pred-traj",
         type=Path,
         default=Path("results/p3/pred_traj_hard"),
-        help="Prediction directory for +traj.",
+        help="Prediction directory for Base+gating+traj.",
     )
     parser.add_argument(
         "--pred-adaptive",
         type=Path,
         default=Path("results/p3/pred_adaptive_hard"),
-        help="Prediction directory for +adaptive.",
+        help="Prediction directory for Base+gating+traj+adaptive.",
     )
     parser.add_argument(
         "--tmp-root",
@@ -490,7 +492,7 @@ def aggregate_and_write_csv(rows: List[Dict[str, str]], out_csv: Path) -> List[D
         )
 
     # Stable ordering for paper.
-    method_order = ["Base", "+gating", "+traj", "+adaptive"]
+    method_order = MAIN_CHAIN_METHOD_ORDER
     bucket_order = [(c, l) for c in CRITERIA for l in LEVELS]
     order_map = {x: i for i, x in enumerate(bucket_order)}
     method_map = {m: i for i, m in enumerate(method_order)}
@@ -515,7 +517,7 @@ def make_paper_assets(rows: List[Dict[str, str]], assets_dir: Path) -> None:
     assets_dir.mkdir(parents=True, exist_ok=True)
 
     # Prepare matrix for plots.
-    methods = ["Base", "+gating", "+traj", "+adaptive"]
+    methods = MAIN_CHAIN_METHOD_ORDER
     bucket_keys = [(c, l) for c in CRITERIA for l in LEVELS]
     bucket_labels = [f"{c[:3]}-{l}" for c, l in bucket_keys]
     row_map: Dict[Tuple[str, str, str], Dict[str, str]] = {
@@ -601,10 +603,10 @@ def main() -> None:
         )
 
     method_specs = [
-        {"id": "base", "label": "Base", "pred_dir": args.pred_base},
-        {"id": "gating", "label": "+gating", "pred_dir": args.pred_gating},
-        {"id": "traj", "label": "+traj", "pred_dir": args.pred_traj},
-        {"id": "adaptive", "label": "+adaptive", "pred_dir": args.pred_adaptive},
+        {"id": "base", "label": MAIN_CHAIN_METHOD_ORDER[0], "pred_dir": args.pred_base},
+        {"id": "gating", "label": MAIN_CHAIN_METHOD_ORDER[1], "pred_dir": args.pred_gating},
+        {"id": "traj", "label": MAIN_CHAIN_METHOD_ORDER[2], "pred_dir": args.pred_traj},
+        {"id": "adaptive", "label": MAIN_CHAIN_METHOD_ORDER[3], "pred_dir": args.pred_adaptive},
     ]
     for spec in method_specs:
         if not spec["pred_dir"].exists():

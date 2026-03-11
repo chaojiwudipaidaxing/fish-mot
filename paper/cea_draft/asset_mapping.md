@@ -1,6 +1,6 @@
 # Asset Mapping (Manuscript object -> local file -> frozen evidence)
 
-RESULTS_ROOT = `results/archive/main_val_20260302_TESTCOMMIT1234567_final2`
+RESULTS_ROOT = `results/main_val`
 
 | Manuscript object | Local file used by `main.tex` | Frozen source for audit |
 |---|---|---|

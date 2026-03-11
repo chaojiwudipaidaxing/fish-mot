@@ -11,7 +11,8 @@ from pathlib import Path
 
 
 INPUT_RE = re.compile(r"\\input\{(tables/[^}]+)\}")
-FIG_RE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{(figs/[^}]+)\}")
+FIG_RE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{((?:figs|figures)/[^}]+)\}")
+FIG_SUFFIXES = (".pdf", ".png", ".jpg", ".jpeg")
 
 
 def parse_refs(tex_path: Path) -> tuple[list[str], list[str]]:
@@ -21,8 +22,27 @@ def parse_refs(tex_path: Path) -> tuple[list[str], list[str]]:
 
 def flatten_main(tex_text: str) -> str:
     tex_text = tex_text.replace("figs/", "")
+    tex_text = tex_text.replace("figures/", "")
     tex_text = tex_text.replace("tables/", "")
     return tex_text
+
+
+def resolve_submission_asset(base_dir: Path, rel: str) -> Path | None:
+    candidates = [base_dir / rel]
+    if rel.startswith("figs/") or rel.startswith("figures/"):
+        rel_path = Path(rel)
+        if rel_path.suffix == "":
+            for ext in FIG_SUFFIXES:
+                candidates.append(base_dir / rel_path.with_suffix(ext))
+    elif rel.startswith("tables/"):
+        rel_path = Path(rel)
+        if rel_path.suffix == "":
+            candidates.append(base_dir / rel_path.with_suffix(".tex"))
+
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def check_zip_has_no_subdirs(zip_path: Path) -> tuple[bool, list[str]]:
@@ -51,8 +71,8 @@ def main() -> int:
     table_refs, fig_refs = parse_refs(main_tex)
     print("[CHECK] submission main references")
     for rel in table_refs + fig_refs:
-        src = submission_dir / rel
-        ok = src.exists()
+        src = resolve_submission_asset(submission_dir, rel)
+        ok = src is not None and src.exists()
         print(f"  [{'PASS' if ok else 'FAIL'}] {rel}")
         if not ok:
             return 1
@@ -72,8 +92,11 @@ def main() -> int:
 
     # Flatten referenced assets
     for rel in table_refs + fig_refs:
-        src = submission_dir / rel
-        dst = flat_dir / Path(rel).name
+        src = resolve_submission_asset(submission_dir, rel)
+        if src is None:
+            print(f"[FAIL] missing submission asset: {rel}")
+            return 1
+        dst = flat_dir / src.name
         shutil.copy2(src, dst)
 
     # Rewrite path prefixes in flat main.tex

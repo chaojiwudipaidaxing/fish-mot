@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at_utc": "2026-03-02T12:58:39.839147+00:00",
+  "generated_at_utc": "2026-03-11T21:31:37.015160+00:00",
   "command": "python scripts/make_paper_assets.py",
   "cwd": "C:/Users/占子豪/Desktop/fish-mot",
   "platform": {
@@ -8,12 +8,16 @@
     "release": "10",
     "python": "3.11.9"
   },
-  "git_commit": "TESTCOMMIT1234567",
+  "git_commit": "d03740f78ed83caa11f727f9f7f060491434b199",
   "run_config": {
-    "schema_version": 1,
-    "generated_at_utc": "2026-03-02T06:19:29.953920+00:00",
-    "exp_id": "strong_baselines",
+    "schema_version": 2,
+    "generated_at_utc": "2026-03-11T21:31:34.326557+00:00",
+    "spec_role": "frozen_experiment_spec",
+    "framework_name": "Audit-Ready Evaluation Framework for Fish MOT Reliability",
+    "audit_ready_protocol": true,
+    "exp_id": "main_val",
     "result_name": "main_val",
+    "release_bundle_id": "release_bundle_v1",
     "result_root": "results/main_val",
     "mot_root": "data/mft25_mot_full",
     "seed_root": "results/main_val/seed_runs",
@@ -39,11 +43,32 @@
     "bucket_min_samples": 200,
     "pred_root": "results/main_val/seed_runs/seed_0",
     "methods": [
+      "base",
+      "gating",
+      "traj",
+      "adaptive",
       "bytetrack",
       "ocsort",
       "botsort"
     ],
-    "git_commit": "TESTCOMMIT1234567",
+    "manifest_hash": {
+      "path": "results/main_val/release/manifest.json",
+      "algorithm": "sha256",
+      "value": "pending_manifest_build",
+      "mode": "pending",
+      "note": "manifest snapshot keeps the run_config manifest_hash unresolved to avoid a circular self-reference; see the authoritative run_config.json for the resolved value."
+    },
+    "seed_locking": {
+      "enabled": true,
+      "mode": "fixed_list",
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "policy": "audit_ready_protocol"
+    },
+    "git_commit": "d03740f78ed83caa11f727f9f7f060491434b199",
     "platform": {
       "system": "Windows",
       "release": "10",
@@ -84,9 +109,8 @@
     },
     "run_config": {
       "path": "results/main_val/run_config.json",
-      "size_bytes": 1128,
-      "sha256": "5171539cda914266290557c190005bf5681d12f0fcdd9d8a355d482b59cf83ee",
-      "mtime_utc": "2026-03-02T06:19:29.973478+00:00"
+      "reference_policy": "path_only_no_nested_hash",
+      "note": "The authoritative run_config.json stores the resolved manifest SHA256, so the manifest records it by path only to avoid a circular nested hash."
     },
     "degradation_grid_csv": {
       "path": "results/main_val/tables/degradation_grid.csv",
@@ -117,38 +141,38 @@
     "paper_main_table_csv": {
       "path": "results/main_val/paper_assets/paper_main_table.csv",
       "size_bytes": 789,
-      "sha256": "be91aa4b443f844c1e923bd1487e6a91833d0f946e7b307c4a3fc4258c637ae9",
-      "mtime_utc": "2026-03-02T12:58:39.456070+00:00"
+      "sha256": "8b2357899185bc46baf1e8c016101237a6ecddc285795e0e6e0d1c6f6ef6205d",
+      "mtime_utc": "2026-03-11T21:31:34.598804+00:00"
     },
     "paper_main_table_tex": {
       "path": "results/main_val/paper_assets/paper_main_table.tex",
-      "size_bytes": 557,
-      "sha256": "2dc529bd7b6a11cffa3d9e4ef81aec3dd6309d9e5777dbc2cc7461d0209819f7",
-      "mtime_utc": "2026-03-02T12:58:39.457071+00:00"
+      "size_bytes": 509,
+      "sha256": "00ad9003d51df2e2888930ff12f1a8aadbe8e1aeb65ff8da77926cb98f7b9f16",
+      "mtime_utc": "2026-03-11T21:31:34.598804+00:00"
     },
     "paper_count_table_csv": {
       "path": "results/main_val/paper_assets/paper_count_table.csv",
       "size_bytes": 218,
       "sha256": "b8147052aeb4a120d37ed26498bb8291417afeb197456fa6bc30c993084ab613",
-      "mtime_utc": "2026-03-02T12:58:39.457071+00:00"
+      "mtime_utc": "2026-03-11T21:31:34.598804+00:00"
     },
     "paper_count_table_tex": {
       "path": "results/main_val/paper_assets/paper_count_table.tex",
-      "size_bytes": 333,
-      "sha256": "793bc73044cb690007c8638fbfe5f10ee120a701e68a310a2312b08483fac71e",
-      "mtime_utc": "2026-03-02T12:58:39.457071+00:00"
+      "size_bytes": 354,
+      "sha256": "502e3052fecf77349ee27e7c2af3659d2c67dc96ae14d363d9ea81bd4304dd44",
+      "mtime_utc": "2026-03-11T21:31:34.598804+00:00"
     },
     "paper_main_table_png": {
       "path": "results/main_val/paper_assets/main_table_val_seedmean_std_paper.png",
-      "size_bytes": 36392,
-      "sha256": "be55d5b3cffe37cafc0c6d640c253032bb6baa3048e08cbf8ab05445bb816830",
-      "mtime_utc": "2026-03-02T12:58:39.682054+00:00"
+      "size_bytes": 121642,
+      "sha256": "83b406234dce74948a1a6122e6b026562d901ef237a941d8f2ea8d365ea8b94a",
+      "mtime_utc": "2026-03-11T21:31:35.041939+00:00"
     },
     "paper_count_png": {
       "path": "results/main_val/paper_assets/count_stability_bar_paper.png",
-      "size_bytes": 39681,
-      "sha256": "156dee4399465241820df109d15c6cacb2d57363b9245d22e6bf34af3b4d0c04",
-      "mtime_utc": "2026-03-02T12:58:39.831146+00:00"
+      "size_bytes": 135784,
+      "sha256": "116f8023a9b317bd1774420261f6c4a1a1576cf040ae993f5949f71a83d4370e",
+      "mtime_utc": "2026-03-11T21:31:36.928847+00:00"
     },
     "merged_with_baselines_csv": {
       "path": "results/main_val/tables/main_table_val_with_baselines.csv",
@@ -167,6 +191,60 @@
       "size_bytes": 1436,
       "sha256": "ae1ef58960f4d3382105d12384ff8316c2e8148e713afc09185fe4ae5fdad7cb",
       "mtime_utc": "2026-03-02T07:08:18.201967+00:00"
+    },
+    "gating_sensitivity_csv": {
+      "path": "results/main_val/tables/gating_thresh_sensitivity.csv",
+      "size_bytes": 255,
+      "sha256": "5e19deb306bbf915018c72df996623381dd9386229e521b9e4eda3e052492c23",
+      "mtime_utc": "2026-03-02T12:49:07.734287+00:00"
+    },
+    "gating_sensitivity_tex": {
+      "path": "results/main_val/paper_assets/gating_thresh_sensitivity.tex",
+      "size_bytes": 434,
+      "sha256": "309b87450aa640351fa46d991a10a913d050bb17814dd208b6cef4c7ee0a042d",
+      "mtime_utc": "2026-03-02T12:49:07.735286+00:00"
+    },
+    "gating_sensitivity_png": {
+      "path": "results/main_val/paper_assets/gating_thresh_sensitivity.png",
+      "size_bytes": 58229,
+      "sha256": "7e8a94c471092cb7dea9d1126312ccabf30cb81d1d0c46f887dcb9c652771549",
+      "mtime_utc": "2026-03-02T12:49:09.591463+00:00"
+    },
+    "degradation_extended_csv": {
+      "path": "results/main_val/tables/degradation_extended.csv",
+      "size_bytes": 8772,
+      "sha256": "bd449e5224626d03325292629c5c0f3dc0217c89af2435ff7b4434475b7478a6",
+      "mtime_utc": "2026-03-11T17:55:45.359765+00:00"
+    },
+    "degradation_extended_tex": {
+      "path": "results/main_val/paper_assets/degradation_extended_delta.tex",
+      "size_bytes": 1038,
+      "sha256": "cdc9c8f73bbd706cff11961eb007e61733874fddc64cd432f421b32fb57ecc21",
+      "mtime_utc": "2026-03-11T17:55:45.359765+00:00"
+    },
+    "degradation_extended_png": {
+      "path": "results/main_val/paper_assets/degradation_extended.png",
+      "size_bytes": 272622,
+      "sha256": "0e98841928ee81e2ea6a86cc56ed4e5d1b89cb0e966bf88e6fe6bf5aebe008dd",
+      "mtime_utc": "2026-03-11T17:55:45.893234+00:00"
+    },
+    "degradation_extended_examples_png": {
+      "path": "results/main_val/paper_assets/degradation_extended_examples.png",
+      "size_bytes": 2438873,
+      "sha256": "207d96f9f87df6f8448a042530eea062e8a8c7136578ba5af41557201dd06f27",
+      "mtime_utc": "2026-03-11T17:55:46.861031+00:00"
+    },
+    "degradation_extended_manuscript_txt": {
+      "path": "results/main_val/tables/degradation_extended_manuscript.txt",
+      "size_bytes": 2481,
+      "sha256": "8159035522135277a53fb6579d4577f398cd7dc7cfc549721252af9a1118b6af",
+      "mtime_utc": "2026-03-11T17:55:46.863039+00:00"
+    },
+    "reproduce_bat": {
+      "path": "results/main_val/release/reproduce.bat",
+      "size_bytes": 2018,
+      "sha256": "f2b7623a9f0807a8417a25b69f152204e65f17cf4a2f5491890e3c5e68098b23",
+      "mtime_utc": "2026-03-11T21:31:37.015160+00:00"
     }
   }
 }

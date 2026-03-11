@@ -1,0 +1,1 @@
+Association-gating logic used in the tracking core. Predicted track states and candidate detections are scored by Mahalanobis distance; candidates outside the threshold are rejected, surviving candidates are passed to assignment, and the resulting trigger statistics are logged for downstream drift diagnostics.

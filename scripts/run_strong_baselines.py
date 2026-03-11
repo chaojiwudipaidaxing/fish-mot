@@ -14,9 +14,11 @@ from typing import Dict, List, Sequence
 import matplotlib.pyplot as plt
 import numpy as np
 
+from method_labels import MAIN_CHAIN_METHOD_ORDER, normalize_main_chain_label
+
 
 METRIC_FIELDS = ["HOTA", "DetA", "AssA", "IDF1", "IDSW"]
-EXISTING_METHOD_ORDER = ["Base", "+gating", "+traj", "+adaptive"]
+EXISTING_METHOD_ORDER = MAIN_CHAIN_METHOD_ORDER
 PLOT_DPI = 500
 PLOT_SAVE_KWARGS = {
     "dpi": PLOT_DPI,
@@ -142,13 +144,13 @@ def parse_args() -> argparse.Namespace:
         "--existing-main-mean-csv",
         type=Path,
         default=Path("results/main_table_val_seedmean.csv"),
-        help="Existing Base/+gating/+traj/+adaptive seed-mean CSV.",
+        help="Existing Base/Base+gating/Base+gating+traj/Base+gating+traj+adaptive seed-mean CSV.",
     )
     parser.add_argument(
         "--existing-main-std-csv",
         type=Path,
         default=Path("results/main_table_val_seedstd.csv"),
-        help="Existing Base/+gating/+traj/+adaptive seed-std CSV.",
+        help="Existing Base/Base+gating/Base+gating+traj/Base+gating+traj+adaptive seed-std CSV.",
     )
     # Backward compatible alias from previous script version.
     parser.add_argument(
@@ -624,11 +626,14 @@ def load_stats_from_mean_std_csv(
     std_map = {}
     if std_csv.exists():
         for row in read_rows(std_csv):
-            std_map[row.get("method", "")] = row
+            method = normalize_main_chain_label(row.get("method", ""))
+            copied = dict(row)
+            copied["method"] = method
+            std_map[method] = copied
 
     out: Dict[str, Dict[str, object]] = {}
     for row in mean_rows:
-        method = row.get("method", "").strip()
+        method = normalize_main_chain_label(row.get("method", ""))
         if not method:
             continue
         std_row = std_map.get(method, {})
@@ -650,10 +655,10 @@ def load_ordered_stats(
 
 def eval_existing_rows_fallback(args: argparse.Namespace, seeds: List[int]) -> Dict[str, Dict[str, object]]:
     mapping = [
-        ("Base", "pred_base"),
-        ("+gating", "pred_gating"),
-        ("+traj", "pred_traj"),
-        ("+adaptive", "pred_adaptive"),
+        (MAIN_CHAIN_METHOD_ORDER[0], "pred_base"),
+        (MAIN_CHAIN_METHOD_ORDER[1], "pred_gating"),
+        (MAIN_CHAIN_METHOD_ORDER[2], "pred_traj"),
+        (MAIN_CHAIN_METHOD_ORDER[3], "pred_adaptive"),
     ]
     out_root = args.output_root / "_existing_eval"
     collected: List[Dict[str, object]] = []
@@ -795,7 +800,7 @@ def main() -> None:
     missing_core = [method for method in EXISTING_METHOD_ORDER if method not in existing_stats_map]
     if missing_core:
         print(
-            "[warn] Missing Base/+gating/+traj/+adaptive mean/std rows, fallback to per-seed evaluation. "
+            "[warn] Missing Base/Base+gating/Base+gating+traj/Base+gating+traj+adaptive mean/std rows, fallback to per-seed evaluation. "
             f"missing={missing_core}"
         )
         fallback_stats = eval_existing_rows_fallback(args, seeds)

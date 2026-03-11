@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at_utc": "2026-03-10T14:31:00.823466+00:00",
+  "generated_at_utc": "2026-03-11T21:31:34.326557+00:00",
   "spec_role": "frozen_experiment_spec",
   "framework_name": "Audit-Ready Evaluation Framework for Fish MOT Reliability",
   "audit_ready_protocol": true,
@@ -43,7 +43,9 @@
   "manifest_hash": {
     "path": "results/main_val/release/manifest.json",
     "algorithm": "sha256",
-    "value": "53DD4B50610172F736BD52B0A6EBAB7CEB0CB61F4BE25DCE25851E5DF44FCB1C"
+    "value": "58042276886F719F81943A46F91AF084325315E018738804038C726FDBFE8E57",
+    "mode": "current",
+    "note": "resolved against the emitted manifest.json file"
   },
   "seed_locking": {
     "enabled": true,
@@ -55,11 +57,11 @@
     ],
     "policy": "audit_ready_protocol"
   },
-  "git_commit": "TESTCOMMIT1234567",
+  "git_commit": "d03740f78ed83caa11f727f9f7f060491434b199",
   "platform": {
     "system": "Windows",
-    "release": "11",
-    "python": "3.14.0"
+    "release": "10",
+    "python": "3.11.9"
   },
   "cwd": "C:/Users/占子豪/Desktop/fish-mot"
 }

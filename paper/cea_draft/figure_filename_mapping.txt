@@ -1,0 +1,14 @@
+framework_architecture_publication.pdf -> Fig1_framework_architecture.pdf
+framework_architecture_publication.png -> Fig1_framework_architecture.png
+gating_logic_flow_publication.pdf -> Fig2_gating_logic_flow.pdf
+gating_logic_flow_publication.png -> Fig2_gating_logic_flow.png
+degradation_combined_publication.pdf -> Fig3_degradation_combined.pdf
+degradation_combined_publication.png -> Fig3_degradation_combined.png
+failure_cases_2x2_publication.pdf -> Fig4_failure_cases.pdf
+failure_cases_2x2_publication.png -> Fig4_failure_cases.png
+framework_architecture.mmd -> Fig1_framework_architecture.mmd
+gating_logic_flow.mmd -> Fig2_gating_logic_flow.mmd
+framework_architecture.txt -> Fig1_framework_architecture.txt
+gating_logic_flow.txt -> Fig2_gating_logic_flow.txt
+degradation_combined.txt -> Fig3_degradation_combined.txt
+failure_cases_2x2.txt -> Fig4_failure_cases.txt

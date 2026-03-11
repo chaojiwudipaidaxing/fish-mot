@@ -1,22 +1,23 @@
 Dear Editor,
 
-Please consider our manuscript, "A drift-proof and deployment-oriented evaluation framework for fish multi-object tracking in digital aquaculture," for publication in Computers and Electronics in Agriculture.
+Please consider our manuscript, "A drift-aware and deployment-oriented evaluation framework for fish multi-object tracking in digital aquaculture," for publication in Computers and Electronics in Agriculture.
 
-This submission is intentionally engineering-oriented. We do not make winner-takes-all claims over strong baselines. Instead, we contribute an investigator-developed framework that improves evidence reliability and deployment relevance for aquaculture vision systems.
+This submission is intentionally engineering-oriented. We do not make winner-takes-all claims over strong baselines. Instead, we contribute an investigator-developed framework that improves evidence reliability and supports tracking-layer default selection under a shared detector source for aquaculture vision systems.
 
 The core novelty is a coupled protocol:
-1) drift-proof reproducibility controls (run_config locking, manifest hashing, data-drift gates),
+1) audit-ready reproducibility controls with drift-robustness monitoring (run_config locking, manifest hashing, data-drift gates),
 2) controlled degradation protocol for robustness diagnosis,
 3) quantile stratified failure analysis,
 4) count stability metrics,
-5) runtime/resource profiling with deployment guideline generation.
+5) runtime/resource profiling with tracking-layer deployment guideline generation, where Scope B runtime evidence is used for end-to-end system-cost support rather than detector-coupled accuracy claims.
 
 The frozen release bundle includes editable text tables (CSV/TEX), figures, and reproducibility scripts with traceable metadata (git_commit and file hashes). This aligns with CEA's practical emphasis on verifiable agricultural computing systems.
 
-We believe the manuscript can be useful to researchers and practitioners deploying fish tracking/counting pipelines under real resource constraints.
+We believe the manuscript can be useful to researchers and practitioners auditing tracking-layer choices in fish tracking/counting pipelines under real resource constraints.
 
 Sincerely,
 
-Corresponding author (placeholder)
-Institution (placeholder)
-Email (placeholder)
+Zihao Zhan
+College of Fisheries, Huazhong Agricultural University
+Corresponding author
+Email: 2603912826@qq.com

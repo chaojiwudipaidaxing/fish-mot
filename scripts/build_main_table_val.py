@@ -8,17 +8,19 @@ import csv
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+from method_labels import MAIN_CHAIN_METHOD_ORDER
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build results/main_table_val.csv and per_seq_main_val.csv.")
     parser.add_argument("--base-mean", type=Path, required=True, help="Mean CSV for Base.")
-    parser.add_argument("--gating-mean", type=Path, required=True, help="Mean CSV for +gating.")
-    parser.add_argument("--traj-mean", type=Path, required=True, help="Mean CSV for +traj.")
-    parser.add_argument("--adaptive-mean", type=Path, required=True, help="Mean CSV for +adaptive.")
+    parser.add_argument("--gating-mean", type=Path, required=True, help="Mean CSV for Base+gating.")
+    parser.add_argument("--traj-mean", type=Path, required=True, help="Mean CSV for Base+gating+traj.")
+    parser.add_argument("--adaptive-mean", type=Path, required=True, help="Mean CSV for Base+gating+traj+adaptive.")
     parser.add_argument("--base-per-seq", type=Path, required=True, help="Per-seq CSV for Base.")
-    parser.add_argument("--gating-per-seq", type=Path, required=True, help="Per-seq CSV for +gating.")
-    parser.add_argument("--traj-per-seq", type=Path, required=True, help="Per-seq CSV for +traj.")
-    parser.add_argument("--adaptive-per-seq", type=Path, required=True, help="Per-seq CSV for +adaptive.")
+    parser.add_argument("--gating-per-seq", type=Path, required=True, help="Per-seq CSV for Base+gating.")
+    parser.add_argument("--traj-per-seq", type=Path, required=True, help="Per-seq CSV for Base+gating+traj.")
+    parser.add_argument("--adaptive-per-seq", type=Path, required=True, help="Per-seq CSV for Base+gating+traj+adaptive.")
     parser.add_argument(
         "--out-main",
         type=Path,
@@ -54,10 +56,10 @@ def read_rows(csv_path: Path) -> List[Dict[str, str]]:
 def main() -> None:
     args = parse_args()
     groups: List[Tuple[str, Path, Path]] = [
-        ("Base", args.base_mean, args.base_per_seq),
-        ("+gating", args.gating_mean, args.gating_per_seq),
-        ("+traj", args.traj_mean, args.traj_per_seq),
-        ("+adaptive", args.adaptive_mean, args.adaptive_per_seq),
+        (MAIN_CHAIN_METHOD_ORDER[0], args.base_mean, args.base_per_seq),
+        (MAIN_CHAIN_METHOD_ORDER[1], args.gating_mean, args.gating_per_seq),
+        (MAIN_CHAIN_METHOD_ORDER[2], args.traj_mean, args.traj_per_seq),
+        (MAIN_CHAIN_METHOD_ORDER[3], args.adaptive_mean, args.adaptive_per_seq),
     ]
 
     main_rows: List[Dict[str, str]] = []

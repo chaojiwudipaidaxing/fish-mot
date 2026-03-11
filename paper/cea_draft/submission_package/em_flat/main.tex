@@ -1,9 +1,18 @@
-\documentclass[preprint,12pt]{elsarticle}
+\documentclass[5p,twocolumn,a4paper]{elsarticle}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
 \usepackage{booktabs}
 \usepackage{graphicx}
+\graphicspath{{../paper/cea_draft/}{paper/cea_draft/}}
 \usepackage{hyperref}
 \usepackage{siunitx}
-\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\providecommand{\FloatBarrier}{\par}
 \sisetup{
   separate-uncertainty=true,
   table-number-alignment=center,
@@ -14,35 +23,137 @@
 
 \journal{Computers and Electronics in Agriculture}
 
+\definecolor{ceaheaderblue}{RGB}{92, 138, 171}
+\definecolor{ceabannergray}{RGB}{236, 237, 239}
+\definecolor{cealinegray}{RGB}{142, 146, 150}
+\definecolor{ceakeygray}{RGB}{75, 78, 82}
+
+\newcommand{\CEAjournalissue}{Computers and Electronics in Agriculture, submitted manuscript}
+\newcommand{\CEAshortauthors}{Zihao Zhan}
+\newcommand{\CEAaffiliationline}{College of Fisheries, Huazhong Agricultural University, China}
+\newcommand{\CEAcorrespondingline}{Corresponding author: Zihao Zhan (\href{mailto:2603912826@qq.com}{2603912826@qq.com})}
+\newcommand{\CEAarticletype}{Original paper}
+\newcommand{\CEAtitletext}{A drift-aware and deployment-oriented evaluation framework for fish multi-object tracking in digital aquaculture}
+\newcommand{\CEAkeywordlist}{digital aquaculture\\multi-object tracking\\fish counting\\drift monitoring\\reproducibility\\runtime profiling\\edge deployment}
+\newcommand{\CEAabstracttext}{Aquaculture deployments operate under persistent turbidity shifts, sensor jitter, and visibility loss that routinely break laboratory-only tracking claims. This study introduces an investigator-developed evaluation framework for fish multi-object tracking and counting that is centered on audit-ready protocol design, drift-aware monitoring, and deployment decision rules. Rather than optimizing for a single headline score, the framework integrates run-configuration locking, data-ingestion checks, manifest hash tracing, controlled detector degradation (drop/jitter), quantile-stratified difficulty analysis, count stability metrics, and runtime profiling in one reproducible pipeline. On a frozen val-half snapshot (8 sequences, 1000 frames each, seeds 0/1/2), Base reports HOTA 58.232 $\pm$ 0.304 and IDF1 64.042 $\pm$ 0.550, while ByteTrack reports HOTA 58.431 $\pm$ 0.291 and IDF1 64.011 $\pm$ 0.545. The cumulative Base+gating, Base+gating+traj, and Base+gating+traj+adaptive variants are therefore treated as audited control policies rather than automatic upgrades. In this frozen study, added association complexity does not convert into a better pond-side operating point; instead, Base shows the lowest observed identity fragmentation within the internal chain and the clearest tracking-layer stability-to-resource trade-off in the present three-seed audit. Because the paired seed-level significance checks are low-power, these findings are interpreted as directional deployment evidence rather than as proof of a definitive ranking. Controlled degradation, bucketed diagnostics, and runtime profiling then show when that shared-detector tracking-layer default should be kept and when a more complex policy is worth activating. These empirical observations are distilled into threshold-driven decision rules that link fair tracker comparison to pond-side monitoring, while Scope B runtime is used only to characterize end-to-end system cost rather than detector-coupled accuracy ranking.}
+
+\setlength{\columnsep}{16pt}
+\setlength{\headheight}{18pt}
+\setlength{\textfloatsep}{11pt plus 2pt minus 2pt}
+\setlength{\floatsep}{9pt plus 2pt minus 2pt}
+\setlength{\intextsep}{9pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{13pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{11pt plus 2pt minus 2pt}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=ceaheaderblue,
+  urlcolor=ceaheaderblue
+}
+\makeatletter
+\def\ps@ceafirstpage{%
+  \def\@oddhead{}%
+  \let\@evenhead\@oddhead
+  \def\@oddfoot{}%
+  \let\@evenfoot\@oddfoot
+}
+\def\ps@ceamain{%
+  \def\@oddhead{%
+    \vbox{%
+      \hbox to\textwidth{%
+        \footnotesize\itshape \CEAshortauthors\hfil\footnotesize \CEAjournalissue%
+      }%
+      \vskip 1.4pt%
+      \hrule height 0.35pt%
+    }%
+  }%
+  \let\@evenhead\@oddhead
+  \def\@oddfoot{\hfil\footnotesize\thepage\hfil}%
+  \let\@evenfoot\@oddfoot
+}
+\makeatother
+
+\newcommand{\CEAfitcoltable}[1]{%
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{2.6pt}%
+\renewcommand{\arraystretch}{1.04}%
+\resizebox{\columnwidth}{!}{#1}%
+\endgroup
+}
+
+\newcommand{\makeceafrontmatter}{%
+\twocolumn[{%
+\begin{@twocolumnfalse}
+\vspace*{-10mm}
+{\centering\color{ceaheaderblue}\footnotesize \CEAjournalissue\par}
+\vspace{1mm}
+{\centering\footnotesize Contents lists available at ScienceDirect\par}
+\vspace{1.5mm}
+\noindent\colorbox{ceabannergray}{%
+\parbox{\dimexpr\textwidth-2\fboxsep\relax}{%
+\centering
+\vspace{2mm}
+{\Large\bfseries Computers and Electronics in Agriculture\par}
+\vspace{1.4mm}
+{\small journal homepage: \textcolor{ceaheaderblue}{www.elsevier.com/locate/compag}\par}
+\vspace{2mm}
+}}%
+\vspace{2.2mm}
+
+\noindent{\bfseries \CEAarticletype\par}
+\vspace{2.2mm}
+{\raggedright\fontsize{17}{19}\selectfont\bfseries \CEAtitletext\par}
+\vspace{1.8mm}
+{\raggedright\small \CEAshortauthors\par}
+\vspace{0.8mm}
+{\raggedright\footnotesize \CEAaffiliationline\par}
+\vspace{0.6mm}
+{\raggedright\footnotesize \CEAcorrespondingline\par}
+\vspace{2.6mm}
+\hrule height 0.45pt
+\vspace{3mm}
+
+\noindent
+\begin{minipage}[t]{0.27\textwidth}
+{\footnotesize\bfseries\color{ceakeygray} ARTICLE INFO\par}
+\vspace{1.1mm}
+{\scriptsize\itshape Keywords:\par}
+\vspace{0.6mm}
+{\raggedright\scriptsize \CEAkeywordlist\par}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.69\textwidth}
+{\footnotesize\bfseries\color{ceakeygray} ABSTRACT\par}
+\vspace{1.1mm}
+{\scriptsize \CEAabstracttext\par}
+\end{minipage}
+
+\vspace{3.5mm}
+\hrule height 0.45pt
+\vspace{2.6mm}
+\end{@twocolumnfalse}
+}]%
+\thispagestyle{ceafirstpage}
+\pagestyle{ceamain}
+}
+
 \begin{document}
-
-\begin{frontmatter}
-
-\title{A drift-proof and deployment-oriented evaluation framework for fish multi-object tracking in digital aquaculture}
-
-\author{Anonymous Author(s)}
-
-\begin{abstract}
-This study presents an investigator-developed evaluation framework for fish multi-object tracking and counting in digital aquaculture, centered on auditable protocol design and deployment decision rules. Rather than claiming across-the-board gains, we integrate run-configuration locking, data-drift gates, manifest hash tracing, controlled detector degradation (drop/jitter), quantile stratified difficulty analysis, count stability metrics, and runtime profiling in one reproducible pipeline. On a frozen val-half snapshot (8 sequences, 1000 frames each, seeds 0/1/2), Base reports HOTA 58.232\,$\pm$\,0.304 and IDF1 64.042\,$\pm$\,0.550, while ByteTrack reports HOTA 58.431\,$\pm$\,0.291 and IDF1 64.011\,$\pm$\,0.545. The +gating/+traj/+adaptive variants expose explicit trade-offs rather than monotonic gains. Controlled degradation and bucketed diagnostics show where failures accumulate (especially low-confidence and turning regimes), while runtime profiling separates lightweight options (Base, +gating) from high-cost options (+traj, +adaptive). We translate these observations into threshold-based guidance for CPU/edge deployment under frame-rate and memory constraints. The resulting contribution is an engineering evidence framework that links fairness, stress testing, failure interpretation, and reproducible release artifacts for smart aquaculture.
-\end{abstract}
-
-\begin{keyword}
-digital aquaculture \sep fish multi-object tracking \sep counting stability \sep reproducibility \sep robustness-cost trade-off \sep edge deployment
-\end{keyword}
-
-\end{frontmatter}
+\makeceafrontmatter
 
 \section{Introduction}
-Digital aquaculture relies on reliable fish trajectories and counts for biomass estimation, feeding control, and welfare monitoring. In this context, a model that is slightly better on a single benchmark but hard to reproduce or deploy can be less useful than a model with transparent limits and stable behavior. Therefore, this paper follows a route-B positioning: we do not claim universal dominance. We instead present a complete evaluation framework that links fairness, robustness diagnostics, and deployment decisions under compute constraints.
+Digital aquaculture relies on reliable fish trajectories and counts for biomass estimation, feeding control, and welfare monitoring. What farms ultimately need is not another laboratory leaderboard, but a trusted conclusion about which tracking profile is the safer audited default under a shared detector source, without silently corrupting counting and management decisions.
 
-To make the claims directly testable, this work contributes:
-\begin{enumerate}
-  \item an auditable evaluation protocol that locks run configuration, data gates, and manifest hashes;
-  \item a controlled degradation matrix (drop/jitter) plus a gating-threshold sensitivity check for robustness auditing;
-  \item stratified difficulty diagnostics (occlusion/density/turn/low-confidence) to localize failure modes in ID consistency and counting;
-  \item deployment decision rules derived from joint accuracy--cost evidence (FPS, memory, CPU, and count stability);
-  \item a reproducibility package design for double-blind review and post-acceptance release.
-\end{enumerate}
+In operational ponds, turbidity shifts, bubbles, specular reflections, and camera vibration are routine rather than exceptional. A tracker that reports a strong laboratory HOTA on clean clips can degrade abruptly once visibility changes, and that deployment gap propagates into unstable counts, fragmented trajectories, and unreliable management signals for biomass estimation, feeding control, and welfare alarms.
+
+This instability also makes it difficult for developers and system integrators to make rational algorithm choices across embedded hardware tiers, farm-specific cost budgets, and changing visibility conditions.
+
+This paper addresses that gap from an engineering-first perspective. Our premise is simple: agricultural edge systems penalize complexity that cannot repay its cost in pond-side evidence. Rather than asking which method wins a narrow benchmark margin, we ask which tracker configurations remain auditable, drift-aware, and resource-feasible across clear and turbid conditions, and which tracking-layer default profile best preserves counting trust when visibility degrades under a shared detector source. The contribution is therefore a deployment-oriented evaluation framework that acts as a trust bridge between fair comparison, stress testing, failure localization, and runtime-aware decision support.
+
+To make the claims directly testable, we organize the contribution into three linked layers. \textbf{C1: Audit-ready evaluation protocol} establishes a frozen experiment specification built around \texttt{run\_config.json}, manifest hashes, and a mirrored release package. A pervasive challenge in agricultural automation is experimental drift, where small path or setting changes silently break table and figure reproducibility; C1 addresses that risk by making the audit trail explicit in the same artifacts that generate Tables~\ref{tab:core_main} and \ref{tab:all_methods} and Figs.~\ref{fig:core_main_png} and \ref{fig:all_methods_png}.
+
+\textbf{C2: Drift-aware diagnostics and stress protocol} then extends the framework beyond global benchmark means. In pond deployment, turbidity, turning motion, and low-confidence detections rarely fail uniformly; they fail in pockets that can remain hidden until counting starts to drift. C2 therefore combines controlled degradation, BrackishMOT stress slices, stratified risk buckets, and a closed-loop drift monitor so that failure concentration becomes visible and actionable rather than anecdotal (Table~\ref{tab:degradation_delta}; Figs.~\ref{fig:degradation_combined}, \ref{fig:failure_cases}, \ref{fig:stratified}, and \ref{fig:drift_ablation}; Algorithm~\ref{alg:drift_loop}).
+
+\textbf{C3: Validated deployment decision rules} closes the loop by translating joint tracking, counting, and resource evidence into policy. Agricultural operators do not deploy a tracker because one metric rises slightly on a clean clip; they deploy a profile because it preserves counting trust under compute limits. C3 therefore distills runtime, memory, ID stability, and count error into deployment guidance that helps farmers and system integrators decide when Base should remain the safer audited default at the tracking layer under a shared detector source, and when a more recall-oriented alternative is worth the added cost (Fig.~\ref{fig:runtime}; Table~\ref{tab:count}; Section~\ref{sec:deployment_guideline}).
 
 \section{Related work}
 \subsection{Tracking baselines and association design}
@@ -56,27 +167,140 @@ HOTA explicitly balances detection and association quality and is now a standard
 \subsection{Aquaculture vision, fish tracking, and counting}
 Aquaculture vision has evolved from foundational computer-vision task reviews toward full digital-aquaculture stacks that integrate monitoring, management, and decision support~\cite{zion2012,fore2018,zhou2018feeding,li2020biomass,barbedo2022review,cui2025survey}. Along this trajectory, counting-oriented works have emphasized practical instrumentation and affordability, from embedded counters to vision-based hatchery/fingerling workflows and modern deep counting models~\cite{hernandez2018counter,albuquerque2019fingerlings,zhang2020fishcount}. In parallel, tracking and behavior studies have shifted toward deep models for abnormal-event detection and monitoring robustness in dense farming scenes~\cite{mei2022trackingreview,wang2022abnormal,zhao2024stereo}. 
 
-However, most studies still report isolated task metrics (only counting, only tracking, or only behavior) and rarely connect these outcomes to reproducibility controls, stress-test protocols, and deployment constraints in one auditable pipeline. In line with CEA expectations, our novelty is an investigator-developed evaluation system (drift-proof + stress-tested + deployment-aware), not a first-use re-packaging of off-the-shelf methods.
+However, most studies still report isolated task metrics (only counting, only tracking, or only behavior) and rarely connect these outcomes to reproducibility controls, stress-test protocols, and deployment constraints in one auditable pipeline. In line with CEA expectations, our novelty is an investigator-developed evaluation system (drift-aware + stress-tested + deployment-aware), not a first-use re-packaging of off-the-shelf methods.
 
 \section{Methods: investigator-developed evaluation framework}
-\subsection{Drift-proof reproducibility core}
-The framework starts from a single run configuration (\texttt{run\_config.json}) that locks split, frame budget, seeds, degradation parameters, gating threshold, and data root. Data drift is prevented by an explicit MOT-root policy and a data gate. Outputs are routed into fixed subdirectories (tables, runtime, stratified, paper assets, release), while manifest hashing records provenance of both inputs and outputs.
+\subsection{Terminology and scope}
+\textbf{Input drift} formalizes the volatile nature of pond visibility as a distribution shift between a reference window and an online window for input-side signals (e.g., detection confidence, box geometry, image quality proxies). This definition keeps the system aware of turbidity growth before it silently corrupts fish-counting logic. \textbf{Output drift} denotes a change in output-side quality indicators (e.g., tracking metrics, counting errors, ID consistency proxies) under a fixed evaluation protocol. This work addresses \emph{drift-aware monitoring and response}, not formal drift elimination guarantees.
+
+\subsection{Audit-ready reproducibility core}
+The framework starts from a single run configuration (\texttt{run\_config.json}) that locks split, frame budget, seeds, degradation parameters, gating threshold, and data root. Drift risk is monitored by explicit MOT-root policy checks and data-ingestion gates, rather than assumed to be impossible. Outputs are routed into fixed subdirectories (tables, runtime, stratified, paper assets, release), while manifest hashing records provenance of both inputs and outputs.
+
+\subsection{Drift definition and closed-loop handling}
+Let XtW denote the recent input window of size W and Xref denote a reference window (calibration period). Let q(.) denote output-quality statistics computed on a window.
+In this manuscript, W denotes the fixed monitoring window length and K denotes the persistence window count required to trigger an alert. For the executed BrackishMOT closed-loop evaluation, we set W=50 frames and construct Xref from the first 100 frames per sequence on the clear-control reference streams in split=\texttt{train}, then freeze this reference for online monitoring.
+
+\paragraph{Input-layer indicator.}
+For a scalar feature $z$ (e.g., detection confidence or gating score), we monitor the Kolmogorov--Smirnov distance between empirical \textsc{CDF}s:
+\begin{equation}
+D_{\mathrm{in}}(t)=\sup_{u \in \mathbb{R}}\left|F_{z,t}^{(W)}(u)-F_{z,\mathrm{ref}}(u)\right|.
+\end{equation}
+$D_{\mathrm{in}}(t)$ is unitless and computed per sequence or per deployment stream.
+
+\paragraph{Output-layer indicator.}
+For output metric vector $q_t=[\mathrm{IDSW}_t,\mathrm{CountMAE}_t,\mathrm{F1}_t]^\top$, we monitor normalized deviation:
+\begin{equation}
+D_{\mathrm{out}}(t)=\left\lVert \frac{q_t-\mu_{q,\mathrm{ref}}}{\sigma_{q,\mathrm{ref}}+\epsilon} \right\rVert_1.
+\end{equation}
+Here $\mu_{q,\mathrm{ref}}$ and $\sigma_{q,\mathrm{ref}}$ are reference statistics; $\epsilon$ avoids division by zero.
+
+\paragraph{Trigger and calibration.}
+Drift alert is raised when $D_{\mathrm{in}}(t)>\tau_{\mathrm{in}}$ or $D_{\mathrm{out}}(t)>\tau_{\mathrm{out}}$ for $K$ consecutive windows, where $K\in\mathbb{N}^{+}$ is the persistence hyper-parameter (number of consecutive windows required before alerting). Thresholds are calibrated from reference quantiles (e.g., 95th or 99th percentile), then stress-tested for false alarm and missed-detection trade-offs.
+
+\paragraph{Mitigation policy.}
+Upon alert, the system applies a conservative fallback sequence: enable/strengthen gating, adjust threshold using score quantiles, switch to a safer tracker profile, and log a re-calibration recommendation.
+
+\begin{algorithm}[t]
+\caption{Drift-aware closed-loop monitoring and fallback}
+\label{alg:drift_loop}
+\begin{algorithmic}[1]
+\State \textbf{Input:} stream windows $\mathcal{X}_t^{(W)}=\{x_{t-W+1},\ldots,x_t\}$, window length $W$, persistence count $K$, thresholds $(\tau_{\mathrm{in}},\tau_{\mathrm{out}})$, calibration interval $\mathcal{T}_{\mathrm{cal}}$, fallback profile set $\mathcal{P}$
+\State \textbf{Output:} alert flag $a_t \in \{0,1\}$, selected profile $p_t \in \mathcal{P}$, log record $\ell_t=\{\text{timestamp},D_{\mathrm{in}}(t),D_{\mathrm{out}}(t),c,p_t,\text{decision}\}$
+\State construct $\mathcal{X}_{\mathrm{ref}}$ from $\mathcal{T}_{\mathrm{cal}}$ using the same window rule $\mathcal{X}_t^{(W)}=\{x_{t-W+1},\ldots,x_t\}$
+\State \textbf{State:} alert counter $c \gets 0$, current profile $p_t \gets p_{\mathrm{base}}$
+\For{each window $t$}
+  \State compute $D_{\mathrm{in}}(t)$ from empirical \textsc{CDF} distance to reference
+  \State compute $D_{\mathrm{out}}(t)$ from normalized output deviation
+  \If{$D_{\mathrm{in}}(t)>\tau_{\mathrm{in}}$ \textbf{or} $D_{\mathrm{out}}(t)>\tau_{\mathrm{out}}$}
+    \State $c \gets c+1$
+  \Else
+    \State $c \gets 0$
+  \EndIf
+  \If{$c \ge K$}
+    \State $a_t \gets 1$; switch $p_t$ to a conservative fallback profile in $\mathcal{P}$
+    \State set $\ell_t \gets$ \{timestamp, $D_{\mathrm{in}}(t)$, $D_{\mathrm{out}}(t)$, trigger count $c$, profile $p_t$, decision=fallback\_on\}
+  \Else
+    \State $a_t \gets 0$; keep $p_t$ unchanged
+    \State set $\ell_t \gets$ \{timestamp, $D_{\mathrm{in}}(t)$, $D_{\mathrm{out}}(t)$, trigger count $c$, profile $p_t$, decision=monitoring\_only\}
+  \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+The implemented log schema for the loop is exported in \texttt{results/brackishmot\_drift\_eval\_timeline.csv} with fields
+\{\texttt{scenario, seq, window\_idx, D\_in, D\_out, tau\_in, tau\_out, K, trigger, alert, IDSW, CountMAE, F1}\}.
+Closed-loop validation includes: E1 (false-alert/missed-drift under controlled degradations), E2 (operating-point scan with $K \in \{1,2,3,4,5\}$ and quantiles $\in \{90,95,97,99\}$), and E3 (mitigation on/off comparison).
 
 \subsection{Controlled degradation protocol}
 We evaluate robustness under controlled detection degradation using drop rate and bounding-box jitter. This protocol quantifies how rapidly tracking identity and matching quality degrade as sensor/detector quality worsens, which is central for aquaculture edge deployments where lighting/turbidity conditions vary.
+
+\subsection{Environment-aware stress tests (underwater/aquaculture)}
+Beyond drop/jitter, we define parameterized degradations aligned with aquaculture conditions:
+\begin{enumerate}
+  \item \textbf{Motion blur}: convolve each frame with linear kernel $k_{\ell,\theta}$, where $\ell$ is blur length (pixels) and $\theta$ is motion direction.
+  \item \textbf{Low-light contrast shift}: apply $I'=\alpha I+\beta$ followed by clipping, where $\alpha\in(0,1)$ and $\beta<0$ simulate illumination loss.
+  \item \textbf{Turbidity-like haze}: apply $I' = I \cdot t + A(1-t)$ with transmission $t\in(0,1)$ and ambient light $A$.
+\end{enumerate}
+
+Each degradation is tested at three strengths (low/mid/high) with fixed random seed and identical sequence subsets across methods. In this manuscript version, the \emph{main} stress results are reported on BrackishMOT natural clarity groups (clear / turbid-low / turbid-high), while the synthetic drop/jitter matrix is retained only as an internal frozen benchmark.
+\begin{table}[t]
+\centering
+\caption{Environmental stress-test parameter settings (fixed and logged).}
+\label{tab:stress_param_settings}
+\input{stress_param_table.tex}
+\end{table}
+
+\paragraph{Execution protocol.}
+For main stress reporting, we run on BrackishMOT split=\texttt{train}, with fixed sequence-group selection stored in \texttt{results/brackishmot\_groups.json} and logged in \texttt{logs/brackishmot\_pairing.txt}. These clear/turbid groups are frozen before final grouped metrics are read. BrackishMOT is used here as \textbf{external stress evaluation only}: no model training, no tracker-parameter selection, and no label-driven threshold search enter the Brackish stress tables or figures. The main stress metrics are exported to \texttt{results/brackishmot\_stress\_metrics.csv}. Synthetic split=\texttt{val\_half} degradation sweeps are kept as internal frozen reference only.
+The labeled BrackishMOT \texttt{test} split is not used for headline accuracy reporting in this paper; split=\texttt{test} is reserved for fixed-parameter Scope B-true runtime profiling only.
 
 \subsection{Stratified difficulty diagnostics}
 To expose failure mechanisms beyond global means, we run quantile-based stratified evaluation over occlusion, density, turning, and low-confidence scores. Each bucket reports F1, IDSW, and counting errors, enabling direct identification of difficulty regimes that trigger association instability.
 
 \subsection{Count stability and runtime profiling}
-We augment MOT metrics with count stability indicators (CountMAE/CountRMSE/CountVar/CountDrift) and runtime profiles (FPS, memory peak, normalized CPU). This makes it possible to build threshold-based deployment rules rather than relying on one-score ranking.
+We augment MOT metrics with count stability indicators (CountMAE/CountRMSE/CountVar/CountDrift) and runtime profiles under two scopes: \textbf{A) tracking-only} and \textbf{B) end-to-end} (decode + detect + track + output). This makes it possible to build threshold-based deployment rules rather than relying on one-score ranking.
+
+\subsection{Framework visualization map for reviewers}
+To lower interpretation friction in double-blind review, we provide four manuscript-level figures that move from system framing to deployment evidence. Figure~\ref{fig:framework_architecture} summarizes the overall audit-ready evaluation pipeline used in this study. Rather than introducing a standalone new tracker, the framework organizes detector inputs, modular tracking variants, robustness diagnostics, and deployment-oriented outputs under a frozen experimental specification. Figure~\ref{fig:gating_logic_flow} then illustrates the gating-based association control logic and the corresponding trigger logging process. This design supports both operational filtering and post hoc sensitivity analysis.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{Fig1_framework_architecture}
+\caption{Framework architecture of the audit-ready fish-MOT evaluation pipeline. Pond video frames are decoded into detector outputs, processed by a SORT-style tracking core, optionally refined by gating, trajectory, and adaptive weighting modules, and then summarized by identity, counting, robustness, runtime, and deployment-decision outputs under a frozen experimental specification.}
+\label{fig:framework_architecture}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\linewidth]{Fig2_gating_logic_flow}
+\caption{Association-gating logic used in the tracking core. Predicted track states and candidate detections are scored by Mahalanobis distance; candidates outside the threshold are rejected, surviving candidates are passed to assignment, and the resulting trigger statistics are logged for downstream drift diagnostics.}
+\label{fig:gating_logic_flow}
+\end{figure}
 
 \section{Experimental setup}
 \subsection{Frozen configuration and data}
 Configuration is locked in the frozen release package: split=val-half, MOT root=\texttt{data/mft25\_mot\_full}, max frames=1000, seeds=[0, 1, 2], drop rate=0.2, jitter=0.02, and gating threshold=2000.0. The evaluated val-half bundle contains eight sequences and 8000 evaluated frames in total.
 
+For BrackishMOT external evaluation, we use the audited train-split sequence groups in \texttt{results/brackishmot\_groups.json} (clear / turbid-low / turbid-high), freeze that grouped reporting before reading final metrics, and keep the same groups across stress and drift analyses. These Brackish runs are evaluation-only, do not alter tracker hyper-parameters, and do not enter the headline accuracy tables.
+To keep causal interpretation explicit, tracker-comparison conclusions are reported under oracle detections (variable isolation), while the learned detector is used in Scope B-true only for end-to-end bottleneck characterization. Detector accuracy benchmarking is therefore outside the novelty claim of this manuscript.
+
 \subsection{Methods and fairness protocol}
-We evaluate Base, +gating, +traj, +adaptive, and strong baselines ByteTrack/OC-SORT/BoT-SORT. Fairness rule: all trackers consume the same detection source and are evaluated with the same split/frame budget and TrackEval pipeline. Reporting uses multi-seed mean$\pm$std when available.
+We evaluate Base, Base+gating, Base+gating+traj, Base+gating+traj+adaptive, and strong baselines ByteTrack/OC-SORT/BoT-SORT. Fairness rule: all trackers consume the same detection source and are evaluated with the same split/frame budget and TrackEval pipeline. Reporting uses multi-seed mean$\pm$std when available.
+
+The internal main-table family is cumulative rather than parallel. Base+gating denotes Base with gating enabled; Base+gating+traj adds trajectory cues on top of the gated variant; Base+gating+traj+adaptive adds adaptive weighting on top of that chain. Legacy filenames and script flags such as \texttt{pred\_gating}, \texttt{pred\_traj}, and \texttt{pred\_adaptive} are retained for audit continuity, but the manuscript reports the cumulative display names. By contrast, separate Brackish fallback and threshold-sensitivity experiments that explicitly compare Base versus +gating refer to a genuine gating-only control profile and are labeled that way.
+
+\subsection{Runtime measurement protocol}
+\textbf{Scope A (tracking-only):} measured on pre-loaded detections, including tracker state update, association, and output state generation, while excluding video decode, detector forward pass, and output serialization to disk. \textbf{Scope B (end-to-end):} includes decode + detection + tracking + output serialization under the same sequence list.
+
+For each scope, the timing protocol is: (i) run warm-up iterations excluded from statistics, (ii) run timed repetitions with fixed thread settings and identical input order, and (iii) report central tendency and dispersion as mean±std across repetitions; when required, additionally report a confidence interval (CI) with the estimator and confidence level explicitly stated.
+
+CPU reporting uses two fields: \texttt{cpu\_mean\_1core\_percent} (as returned by the process monitor) and \texttt{cpu\_mean\_norm\_percent} normalized by logical CPU count. Memory is reported as peak RSS in MB.
+
+Runtime records are exported as CSV (\texttt{results/main\_val/runtime/runtime\_profile.csv}) with fields
+\{\texttt{split, method, max\_frames, total\_frames, elapsed\_sec, fps, mem\_peak\_mb, cpu\_mean\_1core\_percent, cpu\_mean\_norm\_percent, note, return\_code, command}\}.
+
+\subsection{Statistical reporting and interpretation}
+All main-table comparisons are reported over three frozen seeds (0/1/2). To check whether the observed ranking differences were stable across these repeated runs, we computed paired seed-level comparisons for HOTA, IDF1, IDSW, and CountMAE using the exported per-seed outputs. Because the paired sample is limited to $n=3$, these tests are low-power by construction; Wilcoxon signed-rank is therefore treated as the preferred test, while paired $t$-tests are retained only as a secondary diagnostic when assumptions are acceptable. Appendix Table~\ref{tab:significance_summary} reports the resulting summary, and the main text uses these p-values only as a stability check rather than as a basis for decisive ranking claims.
 
 \subsection{Research questions}
 RQ1: How do core variants and strong baselines compare on global metrics?\\
@@ -85,34 +309,83 @@ RQ3: Which difficulty buckets dominate ID switches and counting errors?\\
 RQ4: Which methods satisfy deployment budgets on FPS/memory/CPU?
 
 \section{Results}
-\subsection{Core method family (Base to +adaptive)}
-Table~\ref{tab:core_main} and Fig.~\ref{fig:core_main_png} answer RQ1 for the internal method family. Base achieves HOTA 58.232$\pm$0.304 and IDF1 64.042$\pm$0.550. In this frozen run, +gating/+traj/+adaptive are below Base on HOTA/IDF1 and above Base on IDSW, so we treat them as controllable trade-off variants rather than monotonic improvements.
+\subsection{Core cumulative main-chain family}
+For this subsection, the paired Wilcoxon results in Appendix Table~\ref{tab:significance_summary} should be read only as low-power stability checks because the main table uses three seeds. Accordingly, the internal chain is interpreted as a repeated directional trade-off pattern rather than as a statistically settled ranking.
+Table~\ref{tab:core_main} and Fig.~\ref{fig:core_main_png} answer RQ1 for the internal cumulative chain. Base achieves HOTA 58.232 ± 0.304 and IDF1 64.042 ± 0.550. In this frozen run, Base+gating, Base+gating+traj, and Base+gating+traj+adaptive are below Base on HOTA/IDF1 and above Base on IDSW, so we treat them as controllable trade-off variants rather than monotonic improvements.
+
+Scope B-true is used here as an end-to-end system-cost audit only. It is not used to claim detector-coupled accuracy ranking between tracker profiles, because detector benchmarking is outside the scope of the present tracking-layer comparison.
 
 \begin{table}[t]
 \centering
-\caption{Core methods on val-half (mean$\pm$std).}
+\caption{Core cumulative main-chain methods on val-half (mean±std).}
 \label{tab:core_main}
-\input{paper_main_table.tex}
+\CEAfitcoltable{\input{paper_main_table.tex}}
 \end{table}
+
+
+\subsection{Strong baselines and combined comparison}
+In this subsection, strong-baseline differences are reported descriptively. ByteTrack has the highest observed HOTA among the external baselines in the present audit, whereas Base retains lower observed ID fragmentation; Appendix Table~\ref{tab:significance_summary} shows that the paired seed-level tests remain low-power at $n=3$, so neither side of this trade-off is presented as decisively settled.
+Table~\ref{tab:strong_only} and Fig.~\ref{fig:strong_png} answer RQ1 for strong baselines only. ByteTrack attains the highest observed HOTA among the three baselines (58.431 ± 0.291) and is nearly tied with Base on IDF1 (64.011 ± 0.545) in this run.
+
+To show fair side-by-side context, Table~\ref{tab:all_methods} and Fig.~\ref{fig:all_methods_png} combine all methods under one evaluation pipeline. ByteTrack exceeds Base by +0.199 HOTA, while Base reduces IDSW by 9.000 relative to ByteTrack. In automated feeding, biomass estimation, and behavior monitoring loops, frequent identity switches can trigger repeated counting and misleading operator responses, so this lower fragmentation is not a cosmetic secondary metric. Within the present three-seed audit, we treat this pattern as a deployment trade-off rather than as decisive ranking evidence: under the shared detector source used for fair tracker comparison, Base is retained as a conservative audited default at the tracking layer for identity-sensitive monitoring, while ByteTrack is reserved for scenarios that explicitly prioritize recall under severe turbidity.
+
+\begin{table}[t]
+\centering
+\caption{Strong baseline methods (mean±std).}
+\label{tab:strong_only}
+\CEAfitcoltable{\input{strong_baselines_seedmean_std.tex}}
+\end{table}
+
+
+\begin{table*}[t]
+\centering
+\caption{All methods under one fairness setting.}
+\label{tab:all_methods}
+\CEAfitcoltable{\input{main_table_with_baselines.tex}}
+\end{table*}
+
+\FloatBarrier
+
+\subsection{Robustness under controlled degradation}
+Figure~\ref{fig:degradation_combined} extends the robustness analysis by combining qualitative stress examples with quantitative degradation trends. Rather than treating degradation as an abstract score table, the figure shows how motion blur, low illumination, and haze-like turbidity appear at the image level and how the same severity ladder translates into changes in HOTA, IDF1, and CountMAE under one audited protocol.
+
+Across the tested severity ladder, performance deteriorates progressively as stress increases, while the exact penalty ordering depends on method and degradation type. This is why the manuscript keeps both the figure-level overview and the numeric delta table: the goal is to expose operational boundaries conservatively, not to overstate a synthetic winner.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.94\textwidth]{Fig3_degradation_combined}
+\caption{Combined degradation analysis used for deployment-oriented robustness reporting. (A) Qualitative view of the clean frame and three deterministic environmental stress proxies: motion blur, low illumination, and haze or turbidity. (B) Mean robustness curves across the three stress families; ribbons indicate the range across degradation types at the same severity. HOTA and IDF1 decrease as severity rises, while CountMAE increases, exposing the stability boundary relevant for pond deployment.}
+\label{fig:degradation_combined}
+\end{figure*}
+
+As an internal frozen benchmark (MFT25 val-half), we compute drop-induced degradation from drop rate 0.0 to 0.4 at jitter=0.00 and 0.02 (Table~\ref{tab:degradation_delta}). For jitter=0.00, $\Delta$HOTA/$\Delta$IDF1 are: Base (35.707/27.959), +gating (28.299/19.257), ByteTrack (35.557/27.857). For jitter=0.02: Base (33.474/25.141), +gating (24.139/14.888), ByteTrack (33.382/25.082).
+
+At the worst point (drop=0.4, jitter=0.02), HOTA ranking is ByteTrack 41.435 > Base 41.182 > +gating 38.727; the top-vs-second gap is 0.253. IDF1 ties between ByteTrack and Base at 49.770, both above +gating (45.989). For IDSW (lower is better), Base (99.625) < ByteTrack (112.750) < +gating (127.875).
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Degradation deltas from drop 0.0 to 0.4 (seed=0).}
+\label{tab:degradation_delta}
+\input{degradation_delta.tex}
+\end{table*}
+
+\subsection{Qualitative stability and failure cases}
+Figure~\ref{fig:failure_cases} presents representative qualitative cases, including successful tracking and typical failure modes such as ID switches, occlusion-induced loss, and low-confidence misses. These examples are introduced immediately after the robustness figure so that the reader can connect aggregate stress trends to concrete pond-side behavior before moving into finer bucket and drift analyses.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.94\textwidth]{Fig4_failure_cases}
+\caption{Representative qualitative cases used to communicate stability and failure boundaries. The four panels show a stable tracking example, a turning or crossing region associated with identity ambiguity, an occlusion-induced track-loss case, and a low-confidence miss where weak pond visibility suppresses a target before counting becomes visibly unstable.}
+\label{fig:failure_cases}
+\end{figure*}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.92\linewidth]{main_table_val_seedmean_std_paper.png}
-\caption{Core method family comparison (mean$\pm$std).}
+\caption{Core cumulative main-chain comparison (mean$\pm$std).}
 \label{fig:core_main_png}
 \end{figure}
-
-\subsection{Strong baselines and combined comparison}
-Table~\ref{tab:strong_only} and Fig.~\ref{fig:strong_png} answer RQ1 for strong baselines only. ByteTrack is the strongest among the three baselines on HOTA (58.431$\pm$0.291) and IDF1 (64.011$\pm$0.545) in this run.
-
-To show fair side-by-side context, Table~\ref{tab:all_methods} and Fig.~\ref{fig:all_methods_png} combine all methods under one evaluation pipeline. ByteTrack exceeds Base by +0.199 HOTA, while Base has lower IDSW by 9.000 compared with ByteTrack. This supports a trade-off interpretation instead of a single-winner claim.
-
-\begin{table}[t]
-\centering
-\caption{Strong baseline methods (mean$\pm$std).}
-\label{tab:strong_only}
-\input{strong_baselines_seedmean_std.tex}
-\end{table}
 
 \begin{figure}[t]
 \centering
@@ -121,83 +394,159 @@ To show fair side-by-side context, Table~\ref{tab:all_methods} and Fig.~\ref{fig
 \label{fig:strong_png}
 \end{figure}
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.88\textwidth]{main_table_with_baselines.png}
+\caption{Combined comparison of the cumulative main chain and strong baselines.}
+\label{fig:all_methods_png}
+\end{figure*}
+
+\subsection{Environment-aware stress tests (fixed 3$\times$3 matrix)}
+Main external stress results are reported on frozen BrackishMOT natural-condition groups. BrackishMOT is treated here as a field-proxy stress benchmark rather than a cosmetic add-on: the clear, turbid-low, and turbid-high groups approximate the visibility shifts caused by suspended particles, feed disturbance, and changing underwater illumination in real ponds. The grouped reporting uses the fixed train-split file \texttt{results/brackishmot\_groups.json}; these groups were frozen before final metric aggregation, no BrackishMOT labels were used to choose tracker parameters, and the labeled test split is excluded from headline accuracy tables. Table~\ref{tab:stress_param_settings} records these natural group settings.
+
+Figure~\ref{fig:stress_hota_vs_level} reports HOTA across low/mid/high: Base 89.433$\rightarrow$82.724$\rightarrow$55.090, +gating 89.433$\rightarrow$82.574$\rightarrow$53.534, and ByteTrack 91.285$\rightarrow$85.550$\rightarrow$71.300. The low-to-high HOTA drop is 34.343 (Base), 35.899 (+gating), and 19.985 (ByteTrack). Under high stress, IDF1 is 69.785 (Base), 67.356 (+gating), and 77.831 (ByteTrack), with IDSW 0.000, 0.250, and 1.750, respectively.
+
+Bucket diagnostics for +gating at turbid-high versus clear (Fig.~\ref{fig:stress_bucket_shift}) show small but non-uniform high-bucket migration: $\Delta$IDSW is 0 (occlusion), $-1$ (density), +1 (turning), and 0 (low-confidence). Corresponding high-bucket CountMAE shifts are +0.018 (occlusion), +0.011 (density), +0.048 (turning), and +0.000 (low-confidence). Numeric bucket deltas are summarized in Table~\ref{tab:bucket_shift_numeric}. The turning bucket is the clearest risk-increase signal (+1 IDSW, +0.048 CountMAE), while the negative density shift is interpreted as sample-composition variation in this slice rather than guaranteed improvement. We therefore keep bucket-wise reporting for interpretation, while avoiding broad robustness claims from global means alone.
+
 \begin{table}[t]
 \centering
-\caption{All methods under one fairness setting.}
-\label{tab:all_methods}
-\input{main_table_with_baselines.tex}
+\caption{Numeric bucket-risk migration for +gating under BrackishMOT turbid-high stress (relative to clean).}
+\label{tab:bucket_shift_numeric}
+\input{bucket_shift_table.tex}
 \end{table}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.96\linewidth]{main_table_with_baselines.png}
-\caption{Combined comparison of proposed variants and strong baselines.}
-\label{fig:all_methods_png}
+\includegraphics[width=0.98\linewidth]{fig_stress_hota_vs_level}
+\caption{HOTA versus BrackishMOT natural stress groups (clear, turbid-low, and turbid-high).}
+\label{fig:stress_hota_vs_level}
 \end{figure}
 
-\subsection{Robustness under controlled degradation}
-Using the frozen degradation table, we compute drop-induced degradation from drop rate 0.0 to 0.4 at jitter=0.00 and 0.02 (Table~\ref{tab:degradation_delta}). For jitter=0.00, $\Delta$HOTA/$\Delta$IDF1 are: Base (35.707/27.959), +gating (28.299/19.257), ByteTrack (35.557/27.857). For jitter=0.02: Base (33.474/25.141), +gating (24.139/14.888), ByteTrack (33.382/25.082).
-
-At the worst point (drop=0.4, jitter=0.02), HOTA ranking is ByteTrack 41.435 > Base 41.182 > +gating 38.727; the top-vs-second gap is 0.253. IDF1 ties between ByteTrack and Base at 49.770, both above +gating (45.989). For IDSW (lower is better), Base (99.625) < ByteTrack (112.750) < +gating (127.875).
-
-\begin{table}[t]
-\centering
-\caption{Degradation deltas from drop 0.0 to 0.4 (seed=0).}
-\label{tab:degradation_delta}
-\begin{tabular}{l S S S S S S}
-\toprule
-Jitter & {Base $\Delta$HOTA} & {Base $\Delta$IDF1} & {+gating $\Delta$HOTA} & {+gating $\Delta$IDF1} & {ByteTrack $\Delta$HOTA} & {ByteTrack $\Delta$IDF1} \\
-\midrule
-0.00 & 35.707 & 27.959 & 28.299 & 19.257 & 35.557 & 27.857 \\
-0.02 & 33.474 & 25.141 & 24.139 & 14.888 & 33.382 & 25.082 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.92\linewidth]{degradation_grid.png}
-\caption{Controlled degradation curves (Base, +gating, ByteTrack).}
-\label{fig:degradation}
+\includegraphics[width=0.90\linewidth]{fig_stress_bucket_shift}
+\caption{Bucket-risk migration at high stress for +gating, reported as $\Delta$IDSW relative to clean +gating buckets (occlusion, density, turning, low-confidence).}
+\label{fig:stress_bucket_shift}
 \end{figure}
 
 \subsection{Gating threshold sensitivity (deployment robustness check)}
 Using the frozen sensitivity table (seed=0), Base reports HOTA/IDF1/IDSW = 57.831/63.274/79.000, while +gating at thresholds 1000, 2000, and 4000 is identical at 51.469/55.202/130.875.
 Relative to Base, this corresponds to -6.362 HOTA, -8.072 IDF1, and +51.875 IDSW for all three threshold points.
-The overlap of 1000/2000/4000 indicates a plateau region under the current setup, so the default choice (2000) is in a stable regime rather than a single-point tuned setting.
+The overlap of 1000/2000/4000 defines a candidate plateau interval under the current split/seed. We therefore treat 2000 as a default operating point inside this interval, while the activation analysis in Section~\ref{sec:gating_activation} is used to verify whether this pattern reflects true threshold insensitivity or limited score support in the sampled data.
 
-\begin{table}[t]
+\begin{figure}[htbp]
 \centering
-\caption{Gating-threshold sensitivity at seed=0 (Base and +gating).}
-\label{tab:gating_sensitivity}
-\input{gating_sensitivity.tex}
-\end{table}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.90\linewidth]{gating_sensitivity.png}
+\includegraphics[width=0.84\linewidth]{gating_sensitivity.png}
 \caption{Sensitivity of +gating to threshold values (1000/2000/4000) at seed=0.}
 \label{fig:gating_sensitivity}
 \end{figure}
 
-\subsection{Stratified difficulty and failure modes}
-Figure~\ref{fig:stratified} answers RQ3 by showing bucket-wise metrics. For Base, high-risk buckets include turning (mid) (IDSW=627, CountMAE=4.795), low-confidence (mid) (IDSW=612, CountMAE=4.002), and occlusion (low) (IDSW=569, CountMAE=4.655).
+\subsection{Gating activation analysis}
+\label{sec:gating_activation}
+To evaluate the candidate plateau interval, we report activation-level diagnostics of the gating mechanism. In implementation, association cost is:
+\begin{equation}
+C_{ij}=\alpha\left(1-\operatorname{IoU}_{ij}\right)+\beta\, d^2_{\mathrm{maha},ij}+\gamma\, c^{\mathrm{traj}}_{ij},
+\end{equation}
+and gated pairs are masked when \texttt{s\^gate\_ij > tau\_g}. We define the gating score as
+\begin{equation}
+s^{\mathrm{gate}}_{ij}=d^2_{\mathrm{maha},ij},
+\end{equation}
+where both $s^{\mathrm{gate}}_{ij}$ and $\tau_g$ are unitless squared-Mahalanobis quantities.
 
-Relative to Base, +gating increases IDSW in the low-confidence (mid) bucket from 612 to 984 (+372) and raises CountMAE in occlusion (high) from 1.741 to 1.848 (+0.107). This indicates that low-confidence and turning regimes are key failure modes for identity consistency.
+Using \texttt{scripts/eval\_gating\_activation.py} on the frozen split (val-half, 8 sequences, 1000 frames/sequence, seed=0, drop=0.2, jitter=0.02), activation diagnostics show non-trivial gating activity across the tested interval. As $\tau_g$ increases from 1000 to 4000, frame-trigger rate decreases from 0.757750 to 0.683250 and masked-pair rate decreases from 0.620770 to 0.403859 (Table~\ref{tab:gating_activation_rates}). Event-length distributions remain long-tailed (Fig.~\ref{fig:gating_event_length}), and the gating-score CDF with threshold markers (Fig.~\ref{fig:gating_score_cdf}) indicates that the tested thresholds lie in dense score-support regions rather than in an inactive tail.
+
+These diagnostics complement the global threshold-sensitivity results in Table~\ref{tab:gating_sensitivity} and Fig.~\ref{fig:gating_sensitivity}: the candidate interval (1000/2000/4000) is retained as an operating region, but interpreted through activation evidence rather than by metric overlap alone.
+To keep the main Results section readable, the more detailed trigger-event histograms and gating-score CDF plots are moved to Appendix~A while retaining the same audit trail and labels for reviewer follow-up.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.98\linewidth]{stratified_metrics_val.png}
-\caption{Stratified metrics over occlusion, density, turning, and low-confidence buckets; quantile and fallback notes are reported in \texttt{stratified\_metrics\_val.csv}.}
-\label{fig:stratified}
+\includegraphics[width=0.80\linewidth]{fig_gating_trigger_rate}
+\caption{Frame-level and sequence-level trigger rates across $\tau_g \in \{1000,2000,4000\}$.}
+\label{fig:gating_trigger_rate}
 \end{figure}
 
-\subsection{Counting stability}
-Table~\ref{tab:count} and Fig.~\ref{fig:count_png} answer RQ3 from a counting perspective. Mean CountMAE is 2.321 (Base), 2.379 (+gating), 2.375 (+traj), and 2.371 (+adaptive). Mean CountRMSE follows the same order (2.850, 2.916, 2.911, 2.906).
+\begin{table}[htbp]
+\centering
+\caption{Gating-threshold sensitivity at seed=0 (Base and +gating).}
+\label{tab:gating_sensitivity}
+\CEAfitcoltable{\input{gating_sensitivity.tex}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Gating activation rates on the frozen split (seed=0).}
+\label{tab:gating_activation_rates}
+\CEAfitcoltable{\input{gating_trigger_rates.tex}}
+\end{table}
+
+\FloatBarrier
+
+\subsection{Drift-loop closed-loop validation (E1/E2/E3)}
+Using BrackishMOT pairing (clear reference group plus turbid-low and turbid-high groups, split=\texttt{train}), we evaluate a fixed drift loop with window length 50 and calibration length 100. This Brackish train-split scan is a secondary monitoring-policy analysis only: it does not change tracker hyper-parameters, does not alter the frozen grouped stress report, and is not part of the headline accuracy comparison. The input indicator $D_{\mathrm{in}}(t)$ uses the \textsc{KS} \textsc{CDF} supremum distance, while $D_{\mathrm{out}}(t)$ measures normalized output deviation. The turbid-low and turbid-high branches are treated as the deployed drift scenarios.
+
+We then scan quantile pairs \{p90,p95,p97,p99\} and persistence $K \in \{1,2,3,4,5\}$. The trade-off frontier is shown in Fig.~\ref{fig:drift_opscan_tradeoff}, and top candidates are listed in Table~\ref{tab:drift_opscan_topk}. Under the rule ``false-alert rate $\leq$ 5\% then minimize missed drift'', the selected operating point is \textbf{p90/p90 with $K=1$}, giving false-alert rate $0.000000$, missed-drift rate $0.200000$, and trigger delay mean/p95 of $0.0/0.0$ frames.
+Operationally, thresholds are estimated on the clear-control branch, scanned over $(q_{\mathrm{in}},q_{\mathrm{out}},K)$, and then reused unchanged during drift evaluation. This scan is confined to the secondary drift-monitor analysis and is not used for tracker parameter selection or headline accuracy tables. If a stricter FAR target is required (e.g., $\alpha=0.02$), the same scan-and-select rule applies without redefining the drift metrics.
+All thresholds for this scan are fixed before final drift reporting on BrackishMOT \texttt{train}; no labeled BrackishMOT \texttt{test} data are used in this procedure.
+
+For mitigation comparison (E3), we use ``mitigation-on'' as switching to the conservative +gating profile after alert. Under this BrackishMOT operating point, mitigation is triggered on the turbid-low branch; IDSW changes from $4.000000$ (off) to $4.000000$ (on), and CountMAE changes from $0.280000$ to $0.240000$ (Fig.~\ref{fig:mitigation_onoff}). The closed loop is therefore retained for alerting/auditing, while fallback profile design remains a tunable policy rather than a guaranteed improvement.
 
 \begin{table}[t]
 \centering
-\caption{Count stability summary (mean rows).}
+\caption{Top operating points from the BrackishMOT drift scan.}
+\label{tab:drift_opscan_topk}
+\input{drift_opscan_topk.tex}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\linewidth]{fig_drift_opscan_tradeoff}
+\caption{Operating-point scan trade-off on BrackishMOT: false-alert rate versus missed-drift rate, with selected point marked.}
+\label{fig:drift_opscan_tradeoff}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{fig_drift_indicators_over_time}
+\caption{Window-level drift indicators $D_{\mathrm{in}}(t)$ and $D_{\mathrm{out}}(t)$ on clean control, controlled drop/jitter drift, and low-light drift, with recommended threshold lines.}
+\label{fig:drift_indicators}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\linewidth]{fig_drift_ablation}
+\caption{Ablation of persistence $K$ and threshold quantile (p95/p99): false-alert rate versus average missed-drift rate.}
+\label{fig:drift_ablation}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\linewidth]{fig_mitigation_onoff}
+\caption{Mitigation-on vs mitigation-off on alerted windows for drop/jitter and low-light drift scenarios.}
+\label{fig:mitigation_onoff}
+\end{figure}
+
+\subsection{Stratified difficulty and failure modes}
+Figure~\ref{fig:stratified} answers RQ3 by showing bucket-wise metrics, while Fig.~\ref{fig:failure_cases} provides the visual counterpart with representative stable and failure cases. For Base, high-risk buckets include turning (mid) (IDSW=627, CountMAE=4.795), low-confidence (mid) (IDSW=612, CountMAE=4.002), and occlusion (low) (IDSW=569, CountMAE=4.655).
+
+Relative to Base, +gating increases IDSW in the low-confidence (mid) bucket from 612 to 984 (+372) and raises CountMAE in occlusion (high) from 1.741 to 1.848 (+0.107). This indicates that low-confidence and turning regimes are key failure modes for identity consistency.
+These examples align with the quantitative error patterns reported in the stratified analysis, especially in turning, overlap, and weak-target regimes.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.90\textwidth]{stratified_metrics_val.png}
+\caption{Stratified metrics over occlusion, density, turning, and low-confidence buckets; quantile and fallback notes are reported in \texttt{stratified\_metrics\_val.csv}.}
+\label{fig:stratified}
+\end{figure*}
+
+\FloatBarrier
+
+\subsection{Counting stability}
+The counting results are interpreted conservatively. Within the internal chain, CountMAE differences are small in absolute magnitude, and the paired Wilcoxon checks reported in Appendix Table~\ref{tab:significance_summary} remain low-power with $n=3$; we therefore use the count table as directional support for the broader identity-and-cost trade-off rather than as decisive separation.
+Table~\ref{tab:count} and Fig.~\ref{fig:count_png} answer RQ3 from a counting perspective. Mean CountMAE is 2.321 (Base), 2.379 (Base+gating), 2.375 (Base+gating+traj), and 2.371 (Base+gating+traj+adaptive). Mean CountRMSE follows the same order (2.850, 2.916, 2.911, 2.906).
+
+\begin{table}[t]
+\centering
+\caption{Count stability summary for the cumulative main chain (mean rows).}
 \label{tab:count}
 \input{paper_count_table.tex}
 \end{table}
@@ -205,59 +554,173 @@ Table~\ref{tab:count} and Fig.~\ref{fig:count_png} answer RQ3 from a counting pe
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.88\linewidth]{count_stability_bar_paper.png}
-\caption{Count stability comparison.}
+\caption{Count stability comparison for the cumulative main chain.}
 \label{fig:count_png}
 \end{figure}
 
 \subsection{Runtime and resource profile}
-Figure~\ref{fig:runtime} answers RQ4. Base runs at 822.812 FPS with 548.992 MB peak memory and 2.157\% normalized CPU. +gating is 1182.212 FPS, 548.395 MB, 3.355\%. +traj and +adaptive are much heavier: 95.740/89.024 FPS and 734.211/733.199 MB, with CPU around 69.259\%/69.488\%.
+Runtime is reported here as a descriptive deployment-cost audit rather than as an inferential comparison. In particular, the Scope A resource numbers are used to characterize operational overhead, while the seed-level significance tests are reserved for HOTA, IDF1, IDSW, and CountMAE only.
+Figure~\ref{fig:runtime} answers RQ4 for Scope A (tracking-only). Base runs at 822.812 FPS with 548.992 MB peak memory and 2.157\% normalized CPU. Base+gating is 1182.212 FPS, 548.395 MB, 3.355\%. Base+gating+traj and Base+gating+traj+adaptive are much heavier: 95.740/89.024 FPS and 734.211/733.199 MB, with CPU around 69.259\%/69.488\%.
+
+We report Scope A and Scope B separately because they answer different deployment questions. Scope A isolates tracker-internal efficiency under controlled inputs, while Scope B captures user-facing performance when decode and detection overhead are included in the critical path. This separation avoids over-interpreting tracker-only throughput as end-to-end system capacity.
+
+To avoid protocol leakage, we keep three runtime/evaluation lenses in parallel: \textbf{oracle-detection tracking evaluation} (GT-derived detections for tracker-science comparisons), \textbf{Scope B* passthrough} (decode+track+write with detector bypass for pipeline baselining only), and \textbf{Scope B-true} (decode+detector inference+tracking+write for deployment-facing evidence). Scope B-true is measured by \texttt{scripts/run\_scopeb\_profile\_brackish\_true\_e2e.py} on BrackishMOT \texttt{test} split with warm-up=1 and repeat=3. It reports \{\texttt{fps\_e2e, mem\_peak\_mb\_e2e, cpu\_norm\_e2e, decode\_time, detector\_time, tracking\_time, write\_time, detector\_name, input\_resolution}\}. Table~\ref{tab:scopeb_runtime} and Fig.~\ref{fig:runtime_stage_breakdown} summarize Scope B-true: on clear windows, FPS$_{\mathrm{e2e}}$ is 71.737 ± 0.765 (Base) and 70.454 ± 0.473 (+gating); on turbid-high windows, FPS$_{\mathrm{e2e}}$ is 70.310 ± 1.642 (Base) and 69.095 ± 0.722 (+gating). Detector time dominates stage cost in Scope B-true and increases from 5.741 ± 0.079 sec/run (clear Base) to 9.016 ± 0.267 sec/run (turbid-high Base), with \texttt{detector\_name}=\texttt{yolov8n\_best\_122f92d9}. This directly separates true detector bottlenecks from the Scope B* passthrough baseline.
+
+\begin{table}[t]
+\centering
+\caption{Scope B end-to-end runtime profile on BrackishMOT (mean±std; time unit: sec/run).}
+\label{tab:scopeb_runtime}
+\input{runtime_scopeb_brackish_true.tex}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{fig7_runtime_stage_breakdown}
+\caption{Scope B-true normalized stage-cost breakdown (decode, detector, tracking, write) on BrackishMOT clear and turbid-high scenarios; bars are reported in ms/frame.}
+\label{fig:runtime_stage_breakdown}
+\end{figure}
+
+\paragraph{Stage-time breakdown and deployment implication.}
+From Table~\ref{tab:scopeb_runtime}, Base changes from clear to turbid-high as
+decode 2.919$\rightarrow$4.489 sec/run, detector 5.741$\rightarrow$9.016 sec/run, tracking 0.120$\rightarrow$0.482 sec/run, and write 0.004$\rightarrow$0.007 sec/run. With frame counts normalized, detector cost is about 9.10$\rightarrow$9.15 ms/frame while tracking is 0.19$\rightarrow$0.49 ms/frame, consistent with the observed FPS$_{\mathrm{e2e}}$ drop 71.737$\rightarrow$70.310. For +gating, detector time is nearly unchanged (5.788/9.178 sec/run), while tracking time increases slightly (0.126/0.507 sec/run) and FPS$_{\mathrm{e2e}}$ decreases to 70.454/69.095.
+The table retains raw sec/run values for reproducibility, while the figure converts each stage to ms/frame by dividing by \texttt{total\_frames}; this avoids misleading stacked-bar comparisons when scenario lengths differ.
+\begin{itemize}
+  \item \textbf{Engineering conclusion:} in the Scope B-true cost audit, detector inference is the primary throughput bottleneck; tracker variants mainly change tracking-layer IDSW/count stability behavior, with smaller throughput impact than detector-stage shifts.
+\end{itemize}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{runtime_e2e_brackish_true_bar}
+\caption{Scope B-true end-to-end runtime profile on BrackishMOT (FPS, peak memory, normalized CPU).}
+\label{fig:runtime_scopeb}
+\end{figure}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\linewidth]{runtime_profile.png}
-\caption{Runtime profiling (FPS, memory, normalized CPU).}
+\caption{Scope A runtime profiling for the cumulative main chain (FPS, memory, normalized CPU).}
 \label{fig:runtime}
 \end{figure}
 
 \section{Discussion: deployment guideline}
-The results support threshold-based deployment decisions.
-Gating-threshold selection is not ad hoc in this setup: the 1000/2000/4000 sweep falls in a plateau with identical +gating metrics, so using 2000 reflects stable behavior rather than single-point tuning.
+\label{sec:deployment_guideline}
+The deployment guidance in this section is intentionally policy-oriented rather than inferential. Because the paired significance analysis is limited to three seeds and treated as a low-power stability check, the recommendations below should be read as conservative engineering choices for the present audited setting, not as proof of universal dominance.
+For aquaculture deployment, the practical question is not which tracker wins by a fractional HOTA margin on clean laboratory clips, but which profile keeps farm-side counting logic trustworthy as pond visibility shifts over the day. The present audit suggests that extra association machinery is not automatically progress in this regime: once added complexity stops buying a better pond-side operating point, it becomes overhead rather than value.
+This is the Route-B interpretation adopted in this paper, not a rhetorical defense of weaker variants. Under the shared detector source used for tracker comparison, Base is retained as the safer audited default at the tracking layer because it combines lower observed identity fragmentation within the internal chain with ample runtime headroom; Base+gating, Base+gating+traj, and Base+gating+traj+adaptive are retained only as optional control policies when their added behavior is explicitly justified by stress evidence or monitoring needs. In that sense, C3 is a stability-to-resource decision rule, not a leaderboard contest.
+Gating-threshold selection is treated as a candidate operating interval rather than a single tuned constant: under the current split/seed, 1000/2000/4000 show identical +gating metrics, and Section~\ref{sec:gating_activation} specifies the activation diagnostics required to determine whether this observation reflects true insensitivity or limited score support.
+For drift monitoring under BrackishMOT pairing, the selected operating point is p90/p90+$K$=1 from \texttt{results/brackishmot\_drift\_opscan.csv} (false-alert rate 0.000000; missed-drift rate 0.200000; trigger-delay mean/p95 = 0.0/0.0 frames). This operating-point report is secondary monitoring evidence only, not headline accuracy evidence, while larger $K$ increases missed-drift risk on this timeline.
+For environment-aware stress under BrackishMOT natural levels, we interpret HOTA drops with bucket diagnostics rather than a one-line robustness claim: high-stress risk shift for +gating is most visible in the turning bucket, while occlusion/density shifts are smaller (Fig.~\ref{fig:stress_bucket_shift}).
+
+\subsection{Agricultural practical implications}
+The practical implications below inherit the same caution: they summarize observed trade-offs under the current audit and BrackishMOT stress evidence, rather than statistically decisive rankings across all deployment contexts.
+BrackishMOT should be interpreted as a field-proxy benchmark for pond-side visibility change: the clear, turbid-low, and turbid-high groups approximate the clarity shifts caused by suspended particles, feed disturbance, and camera-placement differences. Under the common fairness setting, Base records fewer ID switches than ByteTrack (Table~\ref{tab:all_methods}), which is valuable when downstream counting, biomass estimation, or behavior summaries penalize identity fragmentation. ByteTrack still provides a larger HOTA reserve under severe turbidity, so the correct deployment choice depends on whether the farm prioritizes association continuity or recall under degraded visibility.
 \begin{itemize}
-  \item \textbf{If target is at least 30 FPS and memory budget is up to 600 MB}: Base and +gating both satisfy constraints comfortably (822.8/1182.2 FPS; 549.0/548.4 MB).
-  \item \textbf{If heavier compute is acceptable} (e.g., server-side analysis): +traj/+adaptive can be considered, but their speed-memory-CPU costs are high and should be justified by task-specific value.
-  \item \textbf{Risk-aware monitoring}: low-confidence and turning buckets show strong IDSW growth (e.g., low-confidence (mid)), so online confidence alarms or conservative association policies are recommended in those conditions.
+  \item \textbf{If target throughput is at least 30 FPS with memory around 1.5 GB}: both Base and +gating satisfy Brackish Scope B-true throughput on \texttt{test} (clear/turbid-high FPS: 71.7/70.3 for Base and 70.5/69.1 for +gating; peak memory range 1466.9--1479.0 MB). These Scope B-true numbers are used for system-cost budgeting only. Under the shared detector source used in the tracker audit, Base is the safer audited default at the tracking layer when identity continuity is the primary concern.
+  \item \textbf{If farmers or system integrators manage mixed-condition sites}: keep Base as the default low-fragmentation tracking-layer profile under the shared detector source used in the audit, then consider switching to ByteTrack only when drift alarms and repeated turbid-high evidence indicate that extra recall is worth the added identity fragmentation. This is precisely where the framework helps: it replaces intuition-driven switching with evidence-based operating rules.
+  \item \textbf{If persistent turbid conditions dominate the site}: ByteTrack offers the larger HOTA reserve under turbid-high stress, but its higher IDSW should be budgeted explicitly in downstream counting and trajectory analytics. The current evidence does not justify promoting +gating as a blanket field replacement under turbidity; instead, +gating is more defensible as a conservative audited profile whose activation evidence informs monitoring policy.
+  \item \textbf{If detector complexity increases in deployment}: Scope B* passthrough remains a decode+track baseline, and Scope B-true is used only to show that detector inference is the dominant system-cost stage under the trained YOLOv8n detector; heavier detectors should therefore be paired with reduced input resolution or lighter backbones before field deployment.
+  \item \textbf{Risk-aware monitoring}: prioritize turning and low-confidence alerts when deciding whether to trigger conservative association policies, because these regimes show the clearest instability signals under BrackishMOT stress.
 \end{itemize}
 
-This closes an engineering decision loop from metrics to deployment policy: global benchmark + failure bucket diagnostics + resource budget.
+These rules convert benchmark evidence into pond-side engineering decisions: select the lightest tracking configuration under the current detector source that preserves trajectory continuity in clear water, monitor drift indicators as turbidity rises, and escalate to more recall-oriented profiles only when visibility loss justifies the extra switching and compute budget.
+
+\section{Cross-domain generalization protocol for minimal-cost validation}
+To improve external validity under limited resources, we define a staged protocol with three progressively higher-cost phases:
+\begin{enumerate}
+  \item \textbf{Stage 1 (cross-day, same pond/device).}
+  Calibrate on Day-A and evaluate on Day-B. Transfer tracker hyper-parameters directly; re-estimate only drift-trigger thresholds when needed.
+  \item \textbf{Stage 2 (cross-pond, same device).}
+  Calibrate on Pond-1 and evaluate on Pond-2. Keep association design fixed; permit short-window threshold re-calibration.
+  \item \textbf{Stage 3 (cross-device or public dataset transfer).}
+  Use farm-calibrated settings as zero-shot initialization, then perform limited re-calibration of confidence and drift-trigger thresholds.
+\end{enumerate}
+
+For each plan, report overall metrics (HOTA, IDF1, IDSW, CountMAE), drift indicators ($D_{\mathrm{in}}(t), D_{\mathrm{out}}(t)$), stratified bucket risk shift, and gating trigger-rate shift.
+
+\paragraph{Reporting items.}
+\begin{itemize}
+  \item In-domain versus cross-domain comparison across HOTA/IDF1/IDSW/CountMAE.
+  \item Drift-indicator trajectories $D_{\mathrm{in}}(t)$ and $D_{\mathrm{out}}(t)$ across domains.
+  \item Transferable versus re-calibrated parameter list for each stage.
+\end{itemize}
+
+\paragraph{Failure interpretation protocol.}
+If cross-domain performance degrades, we report whether degradation is dominated by (i) input drift (feature distribution shift), (ii) output drift (IDSW/CountMAE escalation), or (iii) both; and map each case to mitigation steps (threshold re-calibration, conservative mode, or detector refresh).
+
+\section*{Nomenclature / notation}
+\begin{itemize}
+  \item $W$: monitoring window length (frames), used in $\mathcal{X}_t^{(W)}=\{x_{t-W+1},\ldots,x_t\}$.
+  \item $K$: persistence window count required before raising a drift alert.
+  \item $\mathcal{X}_{\mathrm{ref}}$: reference window set built from the calibration interval.
+  \item $D_{\mathrm{in}}(t)$: input-drift indicator, computed as the \textsc{KS} \textsc{CDF} supremum distance.
+  \item $D_{\mathrm{out}}(t)$: output-drift indicator, computed as normalized deviation of $q_t=[\mathrm{IDSW}_t,\mathrm{CountMAE}_t,\mathrm{F1}_t]^\top$.
+  \item $\tau_{\mathrm{in}}, \tau_{\mathrm{out}}$: drift-trigger thresholds for $D_{\mathrm{in}}(t)$ and $D_{\mathrm{out}}(t)$.
+  \item $s^{\mathrm{gate}}_{ij}=d^2_{\mathrm{maha},ij}$ and $\tau_g$: unitless squared-Mahalanobis gating score and its threshold.
+  \item $W_d=\max\!\left(1,\min\!\left(30,\left\lfloor T/5 \right\rfloor\right)\right)$ (frames): edge-window length used by count-drift calculation in a sequence of length $T$.
+  \item CountDrift$_{W_d}$: difference between mean count error in the last and first $W_d$ frames of a sequence (unit: fish/frame).
+  \item \texttt{cpu\_mean\_norm\_percent}: normalized CPU percentage defined as $\texttt{cpu\_mean\_1core\_percent}/N_{\mathrm{logical\_cpu}}$.
+\end{itemize}
 
 \section{Limitations}
-This study has several limitations. First, the evaluation scope is limited to the current val-half split and detector condition; broader domain shifts (different farms, sensors, water conditions) are not fully covered. Second, our variants do not show universal global metric gains in this frozen run, so conclusions are intentionally framed as trade-offs. Third, runtime profiling is collected on the current host and does not yet include dedicated edge hardware benchmarks. Fourth, although reproducibility metadata is strong, data sharing may still be constrained by upstream licensing.
+This study has several limitations. First, the evaluation scope is limited to the current val-half split and detector condition; broader domain shifts (different farms, sensors, water conditions) are not fully covered. Second, the tested variants do not deliver universal global metric gains in this frozen run. For agricultural engineering, this is informative rather than incidental: it indicates that more complex association logic can consume compute without producing a better deployment operating point, so the current evidence supports selective activation rather than upgrade-by-default conclusions. Third, runtime profiling is collected on the current host and does not yet include dedicated edge hardware benchmarks. Fourth, although reproducibility metadata is strong, data sharing may still be constrained by upstream licensing.
+BrackishMOT evidence in this paper is therefore limited to locked external stress/drift auditing on predefined train groups; it is not used for tracker parameter selection, and the labeled test split is excluded from headline accuracy claims.
+An additional statistical limitation is that the paired significance analysis uses only three seeds. As a result, the Wilcoxon p-values are retained only as low-power stability checks, and any method-ranking language in this paper is intentionally framed as directional rather than decisive.
 
 \section{Conclusion and future work}
-We presented a CEA-oriented, drift-proof evaluation framework for fish MOT and counting that prioritizes robustness-cost analysis, failure transparency, and deployment guidance over unsupported winner-takes-all claims. The framework combines fair baseline comparison, controlled degradation, stratified diagnostics, count stability, and runtime profiling within one auditable pipeline.
+We presented a CEA-oriented, drift-aware evaluation framework for fish MOT and counting that is designed to close the gap between benchmark accuracy and pond-side deployment. The framework combines fair baseline comparison, controlled degradation, stratified diagnostics, count stability, and runtime profiling within one auditable pipeline.
+The resulting Route-B interpretation is intentionally conservative: in the present three-seed audit, Base remains the most conservative observed operating point inside the internal chain, but the low-power Wilcoxon checks do not justify claiming a universal ranking.
+
+The evidence therefore supports a limited Route-B deployment lesson: under a shared detector source, the most elaborate association design is not automatically the most useful one, and the Base profile can serve as the safer audited default at the tracking layer when identity stability, counting integrity, and auditability matter more than small headline-score differences.
+The framework is not designed to crown a champion tracker; it is designed to give agricultural robots and their operators a cautious tracking-layer default when pond conditions become uncertain.
 
 Future work for the smart-aquaculture PhD direction includes: (i) multi-sensor fusion with environmental signals (e.g., dissolved oxygen and water temperature), (ii) anomaly behavior recognition with trajectory-context coupling, (iii) cross-pond/domain generalization, and (iv) online updating/calibration strategies under long-term deployment drift.
 
+\section*{Appendix A. Supplementary diagnostics}
+Detailed gating-activation visuals and the compact seed-level significance summary are collected here so the main Results section can preserve enough reading space for the primary figures, tables, and bucket-level diagnostics.
+
+\begin{figure*}[p]
+\centering
+\includegraphics[width=0.78\textwidth]{fig_gating_event_length}
+\caption{Trigger-event length distribution under different gating thresholds.}
+\label{fig:gating_event_length}
+\end{figure*}
+
+\begin{figure*}[p]
+\centering
+\includegraphics[width=0.78\textwidth]{fig_gating_score_cdf}
+\caption{Gating-score CDF with threshold markers for $\tau_g=1000,2000,4000$.}
+\label{fig:gating_score_cdf}
+\end{figure*}
+
+\begin{table*}[p]
+\centering
+\caption{Paired seed-level significance summary for the main tracked comparisons. Wilcoxon is preferred because the paired sample is limited to three seeds; the reported $p$-values are used only as low-power stability checks and not to claim a decisive ranking.}
+\label{tab:significance_summary}
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}%
+\renewcommand{\arraystretch}{1.03}%
+\resizebox{\textwidth}{!}{\input{significance_summary.tex}}
+\endgroup
+\end{table*}
+
 \section{Data availability and reproducibility statement}
-\textbf{Code availability.} Source code and experiment scripts are available to editors/reviewers through an anonymized release package and will be publicly released upon acceptance under a permanent DOI.
+\textbf{Code availability.} Source code and experiment scripts are included in the submission reproducibility package for editorial technical verification. A public repository and archival record will be released with the accepted version.
 
-\textbf{Data availability.} Raw farm videos may be subject to licensing and operational restrictions. When redistribution is limited, we provide derived benchmark artifacts (predictions, per-sequence metrics, aggregated tables, and figure assets) required to reproduce every reported number.
+\textbf{Data availability.} Raw farm videos are subject to licensing and operational restrictions by data owners and cannot be publicly redistributed in this submission. Access requests for raw videos must be submitted to the corresponding author and data owners through the editorial process for case-by-case approval. Derived benchmark artifacts (predictions, per-sequence metrics, aggregated tables, and figure assets) are provided for reproducibility under the same protocol, together with script entry points used to regenerate them.
 
-\textbf{Reproducibility package.} The package includes a locked run configuration, a manifest with provenance fields (\texttt{git\_commit=TESTCOMMIT1234567}) and cryptographic hashes (input entries=10, output entries=9), plus a one-click reproduction script. This bundle is intended to support independent result regeneration without manual path reconstruction.
+\textbf{Reproducibility package.} The submission bundle identifier is \texttt{release\_bundle\_v1}. It includes: \texttt{results/}, \texttt{paper/cea\_draft/}, \texttt{paper/cea\_draft/}, selected scripts, a manifest with git commit hash and SHA256 checksums for tracked inputs and outputs, and one-click build/validation commands. To avoid a circular self-hash, the authoritative \texttt{run\_config.json} stores the resolved SHA256 of \texttt{manifest.json}, whereas the manifest records that run configuration by path only. This bundle is intended to support independent result regeneration without manual path reconstruction.
 
-\section*{Appendix A. Release package}
-For editorial and reviewer access, the reproducibility bundle is shared via anonymized links and a placeholder DOI:
-\begin{itemize}
-  \item Placeholder DOI: \url{https://doi.org/10.5281/zenodo.XXXXXXX}
-  \item Anonymous review link: \url{https://anonymous.4open.science/r/FISH-MOT-RELEASE}
-\end{itemize}
+\section*{Appendix B. Release package}
+For editorial technical check, the reproducibility bundle is included in the submission materials under the fixed identifier \texttt{release\_bundle\_v1}.
 The release package contains run configuration, manifest and hash records, aggregated tables, paper assets, and one-click reproduction scripts.
+All figures and tables in this manuscript are generated from scripts; exact commands and hashes are provided in \texttt{release\_bundle\_v1/}.
 
 \section*{Funding}
 This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 
 \section*{Author contributions (CRediT)}
-Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Writing -- original draft, Writing -- review \& editing, Visualization: [Author 1]. Supervision, Project administration, Resources: [Author 2]. All authors read and approved the final manuscript.
+Zihao Zhan: Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Writing -- original draft, Writing -- review \& editing, Visualization. The author read and approved the final manuscript.
 
 \section*{Competing interests}
 The authors declare no competing interests.
@@ -265,7 +728,7 @@ The authors declare no competing interests.
 \section*{Declaration of Generative AI and AI-assisted technologies in the manuscript preparation process}
 During the preparation of this work, the authors used OpenAI Codex/GPT-based tools to improve language clarity, section organization, and editorial consistency. All scientific content, experiment execution, numerical verification, and final editing decisions were manually performed and validated by the authors, who take full responsibility for the manuscript. No generative AI tools were used to create or modify figures, graphical abstracts, or other artwork in this manuscript.
 
-\bibliographystyle{elsarticle-num}
+\bibliographystyle{elsarticle-harv}
 \bibliography{references}
 
 \end{document}

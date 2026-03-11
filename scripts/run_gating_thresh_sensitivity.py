@@ -204,7 +204,7 @@ def upsert_reproduce_section(reproduce_bat: Path, run_config_path: Path) -> None
     run_cfg_win = str(run_config_path).replace("/", "\\")
     section = [
         start,
-        f"python scripts\\run_gating_thresh_sensitivity.py --run-config {run_cfg_win}",
+        f"\"%PY_EXE%\" scripts\\run_gating_thresh_sensitivity.py --run-config {run_cfg_win}",
         "if errorlevel 1 (",
         "  echo run_gating_thresh_sensitivity failed.",
         "  popd",

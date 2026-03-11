@@ -1,5 +1,5 @@
 - Drift-proof pipeline locks configs, paths, and hashes for fish MOT.
 - Quantile stratified analysis exposes failure buckets and ID instability.
-- Count stability plus runtime profiling support edge deployment planning.
-- Fair strong-baseline comparison uses one shared detector source.
+- Count stability plus runtime profiling support tracking-layer deployment planning.
+- Fair strong-baseline comparison holds one shared detector source fixed.
 - Route-B claim: robustness-cost trade-off, not winner-takes-all.

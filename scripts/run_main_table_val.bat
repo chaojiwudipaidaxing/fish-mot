@@ -63,6 +63,7 @@ if not exist runs\traj_encoder\traj_encoder.pt (
 )
 
 echo [3/5] Run all methods for each seed: %SEEDS%
+echo [map] cumulative main-chain labels: Base; Base+gating=pred_gating; Base+gating+traj=pred_traj; Base+gating+traj+adaptive=pred_adaptive
 for %%S in (%SEEDS:,= %) do (
   set "SEED=%%S"
   set "OUT_DIR=!SEED_ROOT!\seed_%%S"

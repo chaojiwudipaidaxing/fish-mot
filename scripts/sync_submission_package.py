@@ -13,6 +13,7 @@ from pathlib import Path
 
 INPUT_RE = re.compile(r"\\input\{([^}]+)\}")
 FIG_RE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")
+FIG_SUFFIXES = (".pdf", ".png", ".jpg", ".jpeg")
 
 FORBIDDEN_RE = re.compile(
     r"Missing:|TODO|outperform|SOTA|state-of-the-art|superior|overall improvement|\.{2}/\.{2}/results/archive",
@@ -27,6 +28,8 @@ def canonicalize_rel(path_value: str) -> str | None:
         return p
     if p.startswith("figs/"):
         return p
+    if p.startswith("figures/"):
+        return f"figs/{Path(p).name}"
     if "/paper_assets/" in p:
         tail = p.split("/paper_assets/", 1)[1]
         if tail.endswith(".tex"):
@@ -43,6 +46,30 @@ def canonicalize_rel(path_value: str) -> str | None:
         return f"tables/{Path(p).name}"
     if p.endswith(".png"):
         return f"figs/{Path(p).name}"
+    if any(p.endswith(ext) for ext in FIG_SUFFIXES if ext != ".png"):
+        return f"figs/{Path(p).name}"
+    return None
+
+
+def resolve_asset_path(base_dir: Path, rel: str) -> Path | None:
+    candidates = [base_dir / rel]
+    if rel.startswith("figs/"):
+        fig_rel = rel.replace("figs/", "figures/", 1)
+        candidates.append(base_dir / fig_rel)
+        rel_path = Path(rel)
+        fig_path = Path(fig_rel)
+        if rel_path.suffix == "":
+            for ext in FIG_SUFFIXES:
+                candidates.append(base_dir / rel_path.with_suffix(ext))
+                candidates.append(base_dir / fig_path.with_suffix(ext))
+    elif rel.startswith("tables/"):
+        rel_path = Path(rel)
+        if rel_path.suffix == "":
+            candidates.append(base_dir / rel_path.with_suffix(".tex"))
+
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
     return None
 
 
@@ -82,6 +109,7 @@ def to_submission_main(text: str) -> str:
 
 def normalize_tex(text: str) -> str:
     text = text.replace("figs/", "FIG_DIR/")
+    text = text.replace("figures/", "FIG_DIR/")
     text = text.replace("tables/", "TAB_DIR/")
     text = re.sub(r"\s+", " ", text).strip()
     return text
@@ -172,10 +200,10 @@ def main() -> int:
     table_refs, fig_refs = parse_refs_from_text(draft_text)
     print("[STEP0] References parsed from authority main.tex")
     for rel in table_refs + fig_refs:
-        src = draft_dir / rel
-        tag = "PASS" if src.exists() else "FAIL"
+        src = resolve_asset_path(draft_dir, rel)
+        tag = "PASS" if src is not None and src.exists() else "FAIL"
         print(f"  [{tag}] {rel}")
-        if not src.exists():
+        if src is None or not src.exists():
             return 1
 
     submission_dir.mkdir(parents=True, exist_ok=True)
@@ -194,17 +222,30 @@ def main() -> int:
             shutil.rmtree(dst)
         shutil.copytree(draft_dir / "reproducibility", dst)
 
-    if sub_figs.exists():
-        shutil.rmtree(sub_figs)
-    if sub_tables.exists():
-        shutil.rmtree(sub_tables)
+    # On Windows, figure PDFs may be held open by a viewer. Rebuild referenced
+    # assets in place instead of deleting the whole directory tree first.
     sub_figs.mkdir(parents=True, exist_ok=True)
     sub_tables.mkdir(parents=True, exist_ok=True)
 
     for rel in fig_refs:
-        shutil.copy2(draft_dir / rel, submission_dir / rel)
+        src = resolve_asset_path(draft_dir, rel)
+        if src is None:
+            print(f"[FAIL] missing figure source for {rel}")
+            return 1
+        dst_rel = Path(rel)
+        if dst_rel.suffix == "":
+            dst_rel = dst_rel.with_suffix(src.suffix)
+        dst = submission_dir / dst_rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
     for rel in table_refs:
-        shutil.copy2(draft_dir / rel, submission_dir / rel)
+        src = resolve_asset_path(draft_dir, rel)
+        if src is None:
+            print(f"[FAIL] missing table source for {rel}")
+            return 1
+        dst = submission_dir / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
 
     # Verify submission references after rewrite.
     sub_tables, sub_figs_refs = parse_refs_from_text(sub_text)

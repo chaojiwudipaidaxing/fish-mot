@@ -1,0 +1,1 @@
+Framework architecture of the audit-ready fish-MOT evaluation pipeline. Pond video frames are decoded into detector outputs, processed by a SORT-style tracking core, optionally refined by gating, trajectory, and adaptive weighting modules, and then summarized by identity, counting, robustness, runtime, and deployment-decision outputs under a frozen experiment specification.

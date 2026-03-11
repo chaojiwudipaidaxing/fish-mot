@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "<fill-me>",
+  "project": "fish-mot",
+  "release_scope": "paper_release",
+  "notes": [
+    "All paths are relative to the repository root.",
+    "Leave sha256 as null when hashes are not computed for a specific release artifact.",
+    "Do not list data or model files as released unless they are actually included in the archive."
+  ],
+  "environment": {
+    "python": "3.11.9",
+    "platform": "<fill-me>",
+    "shell": "powershell",
+    "requirements_file": "requirements.txt",
+    "git_commit": "<fill-me>"
+  },
+  "frozen_run_config": {
+    "path": "results/main_val/run_config.json",
+    "sha256": null
+  },
+  "inputs": [
+    {
+      "label": "prepared_mot_root",
+      "path": "data/mft25_mot_full",
+      "kind": "directory",
+      "required_for_core_reproduction": true,
+      "sha256": null,
+      "released": false,
+      "notes": "Prepared MOT-style split. This should remain false unless redistribution permission is explicit."
+    },
+    {
+      "label": "traj_encoder_checkpoint",
+      "path": "runs/traj_encoder/traj_encoder.pt",
+      "kind": "file",
+      "required_for_core_reproduction": true,
+      "sha256": null,
+      "released": false,
+      "notes": "Needed for +traj and +adaptive. Do not mark released unless the archive actually contains it."
+    },
+    {
+      "label": "drift_timeline_csv",
+      "path": "results/brackishmot_drift_eval_timeline.csv",
+      "kind": "file",
+      "required_for_core_reproduction": false,
+      "sha256": null,
+      "released": false,
+      "notes": "Only required for the optional drift operating-point scan."
+    },
+    {
+      "label": "third_party_trackeval",
+      "path": "third_party/TrackEval",
+      "kind": "directory",
+      "required_for_core_reproduction": true,
+      "sha256": null,
+      "released": true,
+      "notes": "Vendored evaluator code used by the MOT metric scripts."
+    }
+  ],
+  "outputs": [
+    {
+      "label": "main_table_seedmean_csv",
+      "path": "results/main_val/tables/main_table_val_seedmean.csv",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "main_table_seedstd_csv",
+      "path": "results/main_val/tables/main_table_val_seedstd.csv",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "main_table_plot_png",
+      "path": "results/main_val/paper_assets/main_table_val_seedmean_std.png",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "degradation_grid_csv",
+      "path": "results/main_val/tables/degradation_grid.csv",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "degradation_grid_png",
+      "path": "results/main_val/paper_assets/degradation_grid.png",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "runtime_profile_csv",
+      "path": "results/main_val/runtime/runtime_profile.csv",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "runtime_profile_png",
+      "path": "results/main_val/paper_assets/runtime_profile.png",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "gating_sensitivity_csv",
+      "path": "results/main_val/tables/gating_sensitivity.csv",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "gating_sensitivity_png",
+      "path": "results/main_val/paper_assets/gating_sensitivity.png",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "drift_opscan_csv",
+      "path": "results/brackishmot_drift_opscan.csv",
+      "kind": "file",
+      "sha256": null
+    },
+    {
+      "label": "drift_opscan_pdf",
+      "path": "paper/cea_draft/figures/fig_drift_opscan_tradeoff.pdf",
+      "kind": "file",
+      "sha256": null
+    }
+  ],
+  "commands": [
+    {
+      "label": "main_table",
+      "command": "cmd /c scripts\\run_main_table_val.bat"
+    },
+    {
+      "label": "degradation_grid",
+      "command": "python scripts\\run_degradation_grid.py --run-config results\\main_val\\run_config.json"
+    },
+    {
+      "label": "runtime_profile",
+      "command": "python scripts\\profile_runtime.py --run-config results\\main_val\\run_config.json"
+    },
+    {
+      "label": "gating_sensitivity",
+      "command": "python scripts\\run_gating_thresh_sensitivity.py --run-config results\\main_val\\run_config.json"
+    },
+    {
+      "label": "optional_drift_opscan",
+      "command": "python scripts\\eval_drift_opscan.py --timeline-csv results\\brackishmot_drift_eval_timeline.csv"
+    }
+  ]
+}

@@ -16,12 +16,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
+from method_labels import MAIN_CHAIN_METHOD_ORDER
+
 
 METHOD_SPECS: List[Tuple[str, str]] = [
-    ("Base", "pred_base"),
-    ("+gating", "pred_gating"),
-    ("+traj", "pred_traj"),
-    ("+adaptive", "pred_adaptive"),
+    (MAIN_CHAIN_METHOD_ORDER[0], "pred_base"),
+    (MAIN_CHAIN_METHOD_ORDER[1], "pred_gating"),
+    (MAIN_CHAIN_METHOD_ORDER[2], "pred_traj"),
+    (MAIN_CHAIN_METHOD_ORDER[3], "pred_adaptive"),
 ]
 CRITERIA = ["occlusion", "density", "turn", "low_conf"]
 LEVELS = ["low", "mid", "high"]
@@ -116,9 +118,9 @@ def parse_args() -> argparse.Namespace:
         help="Root directory containing pred_base/pred_gating/pred_traj/pred_adaptive.",
     )
     parser.add_argument("--pred-base", type=Path, default=None, help="Override Base prediction directory.")
-    parser.add_argument("--pred-gating", type=Path, default=None, help="Override +gating prediction directory.")
-    parser.add_argument("--pred-traj", type=Path, default=None, help="Override +traj prediction directory.")
-    parser.add_argument("--pred-adaptive", type=Path, default=None, help="Override +adaptive prediction directory.")
+    parser.add_argument("--pred-gating", type=Path, default=None, help="Override Base+gating prediction directory.")
+    parser.add_argument("--pred-traj", type=Path, default=None, help="Override Base+gating+traj prediction directory.")
+    parser.add_argument("--pred-adaptive", type=Path, default=None, help="Override Base+gating+traj+adaptive prediction directory.")
     parser.add_argument(
         "--max-frames",
         type=int,
@@ -588,10 +590,10 @@ def match_dets(gt_dets: List[GTDet], pred_dets: List[PredDet], iou_thresh: float
 
 def resolve_method_dirs(args: argparse.Namespace) -> Dict[str, Path]:
     overrides = {
-        "Base": args.pred_base,
-        "+gating": args.pred_gating,
-        "+traj": args.pred_traj,
-        "+adaptive": args.pred_adaptive,
+        MAIN_CHAIN_METHOD_ORDER[0]: args.pred_base,
+        MAIN_CHAIN_METHOD_ORDER[1]: args.pred_gating,
+        MAIN_CHAIN_METHOD_ORDER[2]: args.pred_traj,
+        MAIN_CHAIN_METHOD_ORDER[3]: args.pred_adaptive,
     }
     out: Dict[str, Path] = {}
     for method, subdir in METHOD_SPECS:

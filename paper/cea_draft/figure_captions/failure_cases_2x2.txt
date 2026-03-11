@@ -1,0 +1,1 @@
+Representative qualitative cases used to communicate stability and failure boundaries. The four panels show a stable tracking example, a turning or crossing region associated with identity ambiguity, an occlusion-induced track-loss case, and a low-confidence miss where weak pond visibility suppresses a target before counting becomes visibly unstable.

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at_utc": "2026-03-10T14:31:54.076825+00:00",
+  "generated_at_utc": "2026-03-11T21:31:34.326557+00:00",
   "spec_role": "frozen_experiment_spec",
   "framework_name": "Audit-Ready Evaluation Framework for Fish MOT Reliability",
   "audit_ready_protocol": true,
@@ -15,7 +15,7 @@
   "release_dir": "results/main_val/release",
   "runtime_dir": "results/main_val/runtime",
   "stratified_dir": "results/main_val/stratified",
-  "run_config_path": "paper/cea_draft/submission_package/reproducibility/run_config.json",
+  "run_config_path": "results/main_val/run_config.json",
   "split": "val_half",
   "max_frames": 1000,
   "seeds": [
@@ -41,9 +41,11 @@
     "botsort"
   ],
   "manifest_hash": {
-    "path": "paper/cea_draft/submission_package/reproducibility/manifest.json",
+    "path": "results/main_val/release/manifest.json",
     "algorithm": "sha256",
-    "value": "D8A25FC2EEAB950572C4FC45A5EF12E8F09E872E00C1A2C2B4575F7FB0F0ABA3"
+    "value": "6BA08B305CF5762E2D9C6780A66B4B69E3AEDB67A4AD1256D571E1CAA5E89560",
+    "mode": "current",
+    "note": "resolved against the emitted manifest.json file"
   },
   "seed_locking": {
     "enabled": true,
@@ -55,11 +57,11 @@
     ],
     "policy": "audit_ready_protocol"
   },
-  "git_commit": "9d2ba2bb24b7461ef12f5e3f9a8a4675ce27ea15",
+  "git_commit": "d03740f78ed83caa11f727f9f7f060491434b199",
   "platform": {
     "system": "Windows",
-    "release": "11",
-    "python": "3.14.0"
+    "release": "10",
+    "python": "3.11.9"
   },
-  "cwd": "C:/Users/\u5360\u5b50\u8c6a/Desktop/fish-mot"
+  "cwd": "C:/Users/占子豪/Desktop/fish-mot"
 }
